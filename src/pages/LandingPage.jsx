@@ -6,7 +6,7 @@ import History from '../components/History';
 import Features from '../components/Features';
 import HowItWorks from '../components/HowItWorks';
 import Security from '../components/Security';
-import LocationMap from '../components/Locationmap';
+import LocationMap from '../components/LocationMap'
 import Footer from '../components/Footer';
 import ChatWidget from '../components/ChatWidget';
 
