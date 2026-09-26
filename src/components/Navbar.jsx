@@ -6,6 +6,7 @@ const NAV_LINKS = [
   { label: 'Accounts', href: '#features' },
   { label: 'How it works', href: '#how-it-works' },
   { label: 'Security', href: '#security' },
+  { label: 'Find us', href: '#location' },
 ];
 
 export default function Navbar({ onOpenChat }) {

@@ -6,6 +6,7 @@ import History from '../components/History';
 import Features from '../components/Features';
 import HowItWorks from '../components/HowItWorks';
 import Security from '../components/Security';
+import LocationMap from '../components/Locationmap';
 import Footer from '../components/Footer';
 import ChatWidget from '../components/ChatWidget';
 
@@ -22,6 +23,7 @@ export default function LandingPage() {
         <Features />
         <HowItWorks />
         <Security />
+        <LocationMap />
       </main>
       <Footer />
       <ChatWidget
