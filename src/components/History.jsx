@@ -2,7 +2,7 @@
 // cooperative's actual, verified history before this goes live.
 
 const MILESTONES = [
-  { year: 'Founding — [Year]', copy: 'Add a milestone — how and why the cooperative was founded.' },
+  { year: 'Founding — 1993', copy: 'Cooperative Bank of La Union was established, beginning its work as a cooperative bank in the province.' },
   { year: 'Growth — [Year]', copy: 'Add a milestone — a major expansion, branch, or new service.' },
   { year: 'Recognition — [Year]', copy: 'Add a milestone — an award, certification, or regulatory milestone.' },
   { year: 'Today', copy: 'Add where the cooperative stands now and what it currently offers.' },

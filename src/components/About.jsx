@@ -1,11 +1,17 @@
-// Placeholder copy throughout this section — swap in the cooperative's
-// verified mission, vision, and value statements before this goes live.
-
-const VALUE_PILLARS = [
-  'Add a short value statement (e.g. member-owned, community-first).',
-  'Add a short value statement (e.g. locally rooted since [year]).',
-  'Add a short value statement (e.g. regulated by [authority]).',
+const MISSION_LINES = [
+  { letter: 'C', rest: 'ommitted to provide innovative products and services for financial sustainability.' },
+  { letter: 'B', rest: 'e an active player in the economic growth of Agri-Agra and MSMEs sectors.' },
+  { letter: 'L', rest: 'ead in the advocacy for saving mobilization, financial literacy and independence.' },
+  {
+    letter: 'U',
+    rest: 'ndertake appropriate seminars and trainings for the professional growth of officers and staff towards service excellence.',
+  },
 ];
+
+const VISION_TEXT =
+  'A financially stable and growing cooperative bank in Northern Luzon practicing good governance by providing affordable and effective banking services that responds to the needs of its stakeholders in the countryside development.';
+
+const TAGLINE = 'Let your money grow with CBLU';
 
 export default function About() {
   return (
@@ -18,7 +24,7 @@ export default function About() {
         <div className="mb-12 max-w-xl">
           <h2 className="mb-2 font-display text-3xl font-medium md:text-4xl">Who we are</h2>
           <p className="text-ink-soft">
-            Placeholder copy below — replace with the cooperative's verified mission, vision, and history before launch.
+            Cooperative Bank of La Union has served the province since 1993 — here's what guides us.
           </p>
         </div>
 
@@ -29,10 +35,15 @@ export default function About() {
                 <path d="M12 3v18M3 12h18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
               </svg>
             </span>
-            <h3 className="mb-2 text-lg font-semibold">Mission</h3>
-            <p className="text-sm text-ink-soft">
-              Add the cooperative's official mission statement here — a concise sentence on who you serve and why the cooperative exists.
-            </p>
+            <h3 className="mb-4 text-lg font-semibold">Mission</h3>
+            <div className="space-y-3">
+              {MISSION_LINES.map((line) => (
+                <p key={line.letter} className="text-sm leading-relaxed text-ink-soft">
+                  <span className="mr-1 font-display text-2xl font-semibold text-accent">{line.letter}</span>
+                  {line.rest}
+                </p>
+              ))}
+            </div>
           </div>
           <div className="rounded-3xl border border-line bg-panel p-8 shadow-sm">
             <span className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-accent-light/50 text-accent-dark">
@@ -42,21 +53,12 @@ export default function About() {
               </svg>
             </span>
             <h3 className="mb-2 text-lg font-semibold">Vision</h3>
-            <p className="text-sm text-ink-soft">
-              Add the cooperative's official vision statement here — where the cooperative aims to be in the years ahead.
-            </p>
+            <p className="text-sm leading-relaxed text-ink-soft">{VISION_TEXT}</p>
           </div>
         </div>
 
-        <div className="mt-5 grid gap-4 sm:grid-cols-3">
-          {VALUE_PILLARS.map((pillar) => (
-            <div
-              key={pillar}
-              className="rounded-2xl border border-dashed border-line px-5 py-4 text-sm text-ink-soft"
-            >
-              {pillar}
-            </div>
-          ))}
+        <div className="mt-5 rounded-2xl bg-accent-light/40 px-6 py-5 text-center">
+          <p className="font-display text-lg italic text-ink">"{TAGLINE}"</p>
         </div>
       </div>
     </section>

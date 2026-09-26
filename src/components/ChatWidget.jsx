@@ -4,7 +4,7 @@ import Button from './ui/Button';
 
 export default function ChatWidget({ isOpen, onClose, onToggle }) {
   const [messages, setMessages] = useState([
-    { from: 'bot', text: "Hi, I'm the Meridian assistant. What can I help with?" },
+    { from: 'bot', text: "Hi, I'm the CBLU assistant. What can I help with?" },
   ]);
   const [draft, setDraft] = useState('');
   const listRef = useRef(null);
@@ -50,11 +50,11 @@ export default function ChatWidget({ isOpen, onClose, onToggle }) {
       {isOpen && (
         <div
           role="dialog"
-          aria-label="Chat with Meridian assistant"
+          aria-label="Chat with CBLU assistant"
           className="absolute bottom-16 right-0 flex w-80 max-w-[calc(100vw-3rem)] flex-col overflow-hidden rounded-2xl border border-line bg-panel shadow-2xl shadow-ink/20"
         >
           <div className="flex items-center justify-between bg-ink px-4 py-3.5 text-sm font-semibold text-white">
-            <span>Meridian Assistant</span>
+            <span>CBLU Assistant</span>
             <button type="button" onClick={onClose} aria-label="Close chat" className="text-lg leading-none">
               ×
             </button>

@@ -1,6 +1,7 @@
 const VARIANTS = {
   primary: 'bg-ink text-white shadow-lg shadow-ink/10 hover:bg-accent-dark hover:shadow-xl',
   ghost: 'bg-transparent border border-line text-ink hover:border-ink hover:bg-ink/5',
+  ghostLight: 'border border-white/40 bg-white/10 text-white backdrop-blur-sm hover:border-white hover:bg-white/20',
 };
 
 // Renders a <button> by default; pass as="a" (with href) to render a link

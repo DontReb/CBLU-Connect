@@ -6,8 +6,8 @@ export default function Footer() {
     >
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 pb-10 sm:grid-cols-2 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div>
-          <p className="mb-1.5 font-display text-lg text-white">Meridian Bank</p>
-          <p>Straightforward banking, explained plainly.</p>
+          <p className="mb-1.5 font-display text-lg text-white">Cooperative Bank of La Union</p>
+          <p>"Let your money grow with CBLU"</p>
         </div>
         <div>
           <h4 className="mb-3 text-sm font-semibold text-white">Products</h4>
@@ -47,7 +47,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="mx-auto max-w-6xl border-t border-white/10 pt-5 text-xs text-slate-400">
-        <p>© {new Date().getFullYear()} Meridian Bank. Member details and licensing go here.</p>
+        <p>© {new Date().getFullYear()} Cooperative Bank of La Union. Est. 1993.</p>
       </div>
     </footer>
   );
