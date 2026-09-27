@@ -30,7 +30,7 @@ export default function LocationMap() {
         <h2 className="mb-2 font-display text-3xl font-medium md:text-4xl">Find us</h2>
         <p className="text-ink-soft">{BRANCH.address}</p>
       </div>
-      <div className="isolate mx-auto h-96 max-w-5xl overflow-hidden rounded-3xl border border-line shadow-sm">
+      <div className="isolate mx-auto h-96 max-w-5xl overflow-hidden rounded-3xl border border-line shadow-sm transition-shadow duration-200 hover:shadow-lg">
         <MapContainer
           center={BRANCH.position}
           zoom={16}

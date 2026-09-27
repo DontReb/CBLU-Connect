@@ -29,7 +29,7 @@ export default function About() {
         </div>
 
         <div className="grid gap-5 md:grid-cols-2">
-          <div className="rounded-3xl border border-line bg-panel p-8 shadow-sm">
+          <div className="rounded-3xl border border-line bg-panel p-8 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-accent/40 hover:shadow-lg">
             <span className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-accent-light/50 text-accent-dark">
               <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
                 <path d="M12 3v18M3 12h18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
@@ -45,7 +45,7 @@ export default function About() {
               ))}
             </div>
           </div>
-          <div className="rounded-3xl border border-line bg-panel p-8 shadow-sm">
+          <div className="rounded-3xl border border-line bg-panel p-8 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-accent/40 hover:shadow-lg">
             <span className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-accent-light/50 text-accent-dark">
               <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
                 <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.6" />

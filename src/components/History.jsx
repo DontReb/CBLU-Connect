@@ -20,14 +20,14 @@ export default function History() {
         </div>
         <ol className="list-none">
           {MILESTONES.map((m, i) => (
-            <li key={m.year} className="relative flex gap-5 pb-10 last:pb-0">
+            <li key={m.year} className="group relative flex gap-5 pb-10 last:pb-0">
               {i < MILESTONES.length - 1 && (
                 <span
                   className="absolute bottom-0 left-3.5 top-8 w-px bg-line"
                   aria-hidden="true"
                 />
               )}
-              <span className="relative z-10 flex h-7 w-7 flex-none items-center justify-center rounded-full border-2 border-accent bg-panel text-xs font-semibold text-accent">
+              <span className="relative z-10 flex h-7 w-7 flex-none items-center justify-center rounded-full border-2 border-accent bg-panel text-xs font-semibold text-accent transition-all duration-200 group-hover:scale-110 group-hover:bg-accent group-hover:text-white">
                 {i + 1}
               </span>
               <div>

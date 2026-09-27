@@ -24,14 +24,14 @@ export default function HowItWorks() {
       </div>
       <ol className="list-none">
         {STEPS.map((step, i) => (
-          <li key={step.title} className="relative flex gap-5 pb-9 last:pb-0">
+          <li key={step.title} className="group relative flex gap-5 pb-9 last:pb-0">
             {i < STEPS.length - 1 && (
               <span
                 className="absolute bottom-0 left-3.5 top-8 w-px bg-line"
                 aria-hidden="true"
               />
             )}
-            <span className="relative z-10 flex h-7 w-7 flex-none items-center justify-center rounded-full bg-accent text-sm font-semibold text-white shadow-md shadow-accent/30">
+            <span className="relative z-10 flex h-7 w-7 flex-none items-center justify-center rounded-full bg-accent text-sm font-semibold text-white shadow-md shadow-accent/30 transition-transform duration-200 group-hover:scale-110">
               {i + 1}
             </span>
             <div>

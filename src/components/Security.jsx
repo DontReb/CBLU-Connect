@@ -11,7 +11,7 @@ export default function Security() {
         {TRUST_POINTS.map((point) => (
           <div
             key={point}
-            className="rounded-2xl border border-white/10 border-l-2 border-l-accent bg-white/5 p-6 backdrop-blur-sm"
+            className="rounded-2xl border border-white/10 border-l-2 border-l-accent bg-white/5 p-6 backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:bg-white/10"
           >
             <p className="text-sm text-slate-300">{point}</p>
           </div>

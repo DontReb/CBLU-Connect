@@ -40,7 +40,7 @@ export default function Features() {
         {FEATURES.map((feature) => (
           <div
             key={feature.title}
-            className="rounded-2xl border border-line bg-panel p-6 shadow-sm transition-shadow hover:shadow-md"
+            className="rounded-2xl border border-line bg-panel p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-accent/40 hover:shadow-lg"
           >
             <h3 className="mb-1.5 text-lg font-semibold">{feature.title}</h3>
             <p className="text-sm text-ink-soft">{feature.copy}</p>
