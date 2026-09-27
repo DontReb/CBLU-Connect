@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import Button from './ui/Button';
 import logo from '../assets/cblu-logo.png';
 
@@ -28,7 +29,7 @@ export default function Navbar({ onOpenChat }) {
           <Button variant="ghost" onClick={onOpenChat}>
             Chat with us
           </Button>
-          <Button as="a" href="#login" variant="primary">
+          <Button as={Link} to="/login" variant="primary">
             Log in
           </Button>
         </div>

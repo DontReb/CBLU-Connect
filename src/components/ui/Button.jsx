@@ -9,7 +9,7 @@ const VARIANTS = {
 export default function Button({ as: Tag = 'button', variant = 'primary', className = '', ...props }) {
   return (
     <Tag
-      className={`inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${VARIANTS[variant]} ${className}`}
+      className={`inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 ${VARIANTS[variant]} ${className}`}
       {...props}
     />
   );
