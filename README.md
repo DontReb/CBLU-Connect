@@ -1,16 +1,40 @@
-# React + Vite
+# CBLU Connect
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+CBLU Connect is a React/Vite frontend with Vercel serverless APIs and PostgreSQL persistence.
 
-Currently, two official plugins are available:
+## Local setup
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Install Node.js 20+.
+2. Run `npm install`.
+3. Set `DATABASE_URL` and a long random `AUTH_SECRET`.
+4. Apply `db/Schema.sql` to PostgreSQL.
+5. Ensure active users have password hashes in the project's scrypt format.
+6. Run `npm run dev`.
 
-## React Compiler
+After login, `/dashboard` renders by role:
+- **client:** document checklist and OCR upload/validation history.
+- **agent:** escalated chat queue and session controls.
+- **admin:** operational metrics and administrative access.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## API
 
-## Expanding the ESLint configuration
+- `POST /api/auth/login`
+- `GET /api/auth/me`
+- `POST /api/auth/logout`
+- `POST /api/chat/message`
+- `GET/PATCH /api/chat/sessions`
+- `GET /api/dashboard/summary`
+- `GET /api/documents/checklists`
+- `POST /api/documents/upload`
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Deployment
+
+Vercel detects the `api/` serverless functions. `vercel.json` uses an SPA rewrite that excludes `/api/*`.
+
+Set `DATABASE_URL` and `AUTH_SECRET` in Vercel Project Settings before deployment.
+
+## OCR
+
+Document uploads use Tesseract.js and the validation rules in `checklist_items.validation_rules`. OCR and validation results are persisted in PostgreSQL.
+
+For production, also configure upload limits, storage retention, database backups, rate limiting, and secret rotation.
