@@ -2,10 +2,10 @@
 // cooperative's actual, verified history before this goes live.
 
 const MILESTONES = [
-  { year: 'Founding — 1993', copy: 'Cooperative Bank of La Union was established, beginning its work as a cooperative bank in the province.' },
-  { year: 'Growth — [Year]', copy: 'Add a milestone — a major expansion, branch, or new service.' },
-  { year: 'Recognition — [Year]', copy: 'Add a milestone — an award, certification, or regulatory milestone.' },
-  { year: 'Today', copy: 'Add where the cooperative stands now and what it currently offers.' },
+  { year: 'Conceptualization — 1991', copy: 'The Cooperative Bank of La Union (CBLU) was conceptualized on September 9, 1991 through the initiative of Chairman Amparo M. Aspiras of the La Union Ladies Association (LULA), inspired by the vision of former Agoo Mayor Jose Luis M. Aspiras to help poor communities overcome poverty through cooperative banking.' },
+  { year: 'Authorization and Registration — 1993', copy: 'CBLU received its Certificate of Authority to Operate from the Bangko Sentral ng Pilipinas (BSP) on November 24, 1993. It was officially registered as a cooperative entity by the Cooperative Development Authority (CDA) on December 15, 1993.' },
+  { year: 'Start of Operations — 1994', copy: 'On January 18, 1994, CBLU officially began operations in Consolacion, Agoo, La Union. The bank started with 26 cooperative members and a paid-up capital of ₱2.7 million, providing financial services primarily to cooperative members.' },
+  { year: 'Growth and Present Day — Today', copy: 'After nearly three decades of operation, CBLU has grown to 178 cooperative owners with ₱15 million subscribed and paid-up capital, ₱33.362 million net worth, and ₱279.363 million total assets. The bank now operates from its building along National Highway, Sta. Barbara, Agoo, La Union, continuing to provide quality banking services to cooperatives and the general public.' },
 ];
 
 export default function History() {
