@@ -28,6 +28,9 @@ const ICON_PATHS = {
       <path d="M9.5 13l1.75 1.75L14.5 11" />
     </>
   ),
+    // Same shape as the chat toggle button in ChatWidget, so the nav item ties
+  // visually back to the widget these sessions are escalated from.
+  chat: <path d="M4 5h16v11H8l-4 4V5z" />,
   menu: <path d="M4 7h16M4 12h16M4 17h16" />,
   close: <path d="M6 6l12 12M18 6 6 18" />,
   logout: (
