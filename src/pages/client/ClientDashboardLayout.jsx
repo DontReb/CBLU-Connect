@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import { MOCK_CLIENT } from '../../lib/mockClient';
+import ChecklistProvider from '../../lib/ChecklistProvider';
 
 // TODO: once /api/auth/login exists, userName should come from the
 // authenticated session instead of MOCK_CLIENT, and this route should
@@ -14,7 +15,9 @@ const NAV_ITEMS = [
 export default function ClientDashboardLayout() {
   return (
     <DashboardLayout roleLabel="Client" userName={MOCK_CLIENT.fullName} navItems={NAV_ITEMS}>
-      <Outlet />
+      <ChecklistProvider>
+        <Outlet />
+      </ChecklistProvider>
     </DashboardLayout>
   );
 }

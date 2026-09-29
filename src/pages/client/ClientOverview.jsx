@@ -1,21 +1,25 @@
 import { Link } from 'react-router-dom';
-import { MOCK_CLIENT, MOCK_CHECKLIST } from '../../lib/mockClient';
+import { MOCK_CLIENT } from '../../lib/mockClient';
+import { useChecklist } from '../../lib/checklistContext';
 
 const STATUS_STYLES = {
   valid: 'bg-accent-light/50 text-accent-dark',
   invalid: 'bg-red-100 text-red-700',
   pending: 'bg-line/60 text-ink-soft',
+  processing: 'bg-highlight/40 text-ink',
 };
 
 const STATUS_LABELS = {
   valid: 'Valid',
   invalid: 'Needs attention',
   pending: 'Not submitted',
+  processing: 'Checking…',
 };
 
 export default function ClientOverview() {
-  const completed = MOCK_CHECKLIST.items.filter((item) => item.status === 'valid').length;
-  const total = MOCK_CHECKLIST.items.length;
+  const { checklist } = useChecklist();
+  const completed = checklist.items.filter((item) => item.status === 'valid').length;
+  const total = checklist.items.length;
   const firstName = MOCK_CLIENT.fullName.split(' ')[0];
 
   return (
@@ -25,13 +29,13 @@ export default function ClientOverview() {
           Welcome back, {firstName}
         </h1>
         <p className="mt-1 text-sm text-ink-soft">
-          Here's where things stand with your {MOCK_CHECKLIST.name.toLowerCase()} application.
+          Here's where things stand with your {checklist.name.toLowerCase()} application.
         </p>
       </div>
 
       <div className="rounded-2xl border border-line bg-panel p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-ink">{MOCK_CHECKLIST.name}</h2>
+          <h2 className="text-lg font-semibold text-ink">{checklist.name}</h2>
           <span className="text-sm text-ink-soft">
             {completed} of {total} complete
           </span>
@@ -43,7 +47,7 @@ export default function ClientOverview() {
           />
         </div>
         <ul className="space-y-2.5">
-          {MOCK_CHECKLIST.items.map((item) => (
+          {checklist.items.map((item) => (
             <li
               key={item.id}
               className="flex items-center justify-between rounded-xl border border-line px-4 py-3"
