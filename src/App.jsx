@@ -7,6 +7,11 @@ import ClientDashboardLayout from './pages/client/ClientDashboardLayout';
 import ClientOverview from './pages/client/ClientOverview';
 import ClientDocuments from './pages/client/ClientDocuments';
 import ClientProfile from './pages/client/ClientProfile';
+import AdminDashboardLayout from './pages/admin/AdminDashboardLayout';
+import AdminOverview from './pages/admin/AdminOverview';
+import AdminClients from './pages/admin/AdminClients';
+import AdminChecklists from './pages/admin/AdminChecklists';
+import AdminReviews from './pages/admin/AdminReviews';
 
 // A dashboard has its own internal tabs (Overview/Documents/Profile) that
 // shouldn't replay the page-enter/exit animation every time you click
@@ -51,6 +56,19 @@ function AnimatedRoutes() {
           <Route index element={<ClientOverview />} />
           <Route path="documents" element={<ClientDocuments />} />
           <Route path="profile" element={<ClientProfile />} />
+        </Route>
+        <Route
+          path="/dashboard/admin"
+          element={
+            <PageTransition>
+              <AdminDashboardLayout />
+            </PageTransition>
+          }
+        >
+          <Route index element={<AdminOverview />} />
+          <Route path="clients" element={<AdminClients />} />
+          <Route path="checklists" element={<AdminChecklists />} />
+          <Route path="reviews" element={<AdminReviews />} />
         </Route>
       </Routes>
     </AnimatePresence>
