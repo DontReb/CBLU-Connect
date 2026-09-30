@@ -1,11 +1,8 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../layouts/DashboardLayout';
-import { MOCK_CLIENT } from '../../lib/mockClient';
 import ChecklistProvider from '../../lib/ChecklistProvider';
+import { useAuth } from '../../lib/authContext';
 
-// TODO: once /api/auth/login exists, userName should come from the
-// authenticated session instead of MOCK_CLIENT, and this route should
-// redirect to /login if there isn't one.
 const NAV_ITEMS = [
   { to: '/dashboard/client', label: 'Overview', icon: 'home', end: true },
   { to: '/dashboard/client/documents', label: 'Documents', icon: 'document' },
@@ -13,8 +10,22 @@ const NAV_ITEMS = [
 ];
 
 export default function ClientDashboardLayout() {
+  // RequireRole guarantees a logged-in client by the time this renders.
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  async function handleLogout() {
+    await logout();
+    navigate('/', { replace: true });
+  }
+
   return (
-    <DashboardLayout roleLabel="Client" userName={MOCK_CLIENT.fullName} navItems={NAV_ITEMS}>
+    <DashboardLayout
+      roleLabel="Client"
+      userName={user.fullName}
+      navItems={NAV_ITEMS}
+      onLogout={handleLogout}
+    >
       <ChecklistProvider>
         <Outlet />
       </ChecklistProvider>

@@ -1,12 +1,8 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import AdminDataProvider from '../../lib/AdminDataProvider';
-import { MOCK_ADMIN } from '../../lib/mockAdmin';
+import { useAuth } from '../../lib/authContext';
 
-// TODO: once /api/auth/login exists, userName should come from the
-// authenticated session instead of MOCK_ADMIN, and this route should
-// redirect to /login if there isn't one (or to the right dashboard for
-// whatever role is actually logged in).
 const NAV_ITEMS = [
   { to: '/dashboard/admin', label: 'Overview', icon: 'home', end: true },
   { to: '/dashboard/admin/clients', label: 'Clients', icon: 'user' },
@@ -15,8 +11,22 @@ const NAV_ITEMS = [
 ];
 
 export default function AdminDashboardLayout() {
+  // RequireRole guarantees a logged-in admin by the time this renders.
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  async function handleLogout() {
+    await logout();
+    navigate('/', { replace: true });
+  }
+
   return (
-    <DashboardLayout roleLabel="Admin" userName={MOCK_ADMIN.fullName} navItems={NAV_ITEMS}>
+    <DashboardLayout
+      roleLabel="Admin"
+      userName={user.fullName}
+      navItems={NAV_ITEMS}
+      onLogout={handleLogout}
+    >
       <AdminDataProvider>
         <Outlet />
       </AdminDataProvider>

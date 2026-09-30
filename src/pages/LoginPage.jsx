@@ -1,15 +1,26 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Button from '../components/ui/Button';
 import logo from '../assets/cblu-logo.png';
+import { useAuth } from '../lib/authContext';
+
+const DASHBOARD_PATH_BY_ROLE = {
+  admin: '/dashboard/admin',
+  client: '/dashboard/client',
+  agent: '/dashboard/agent',
+};
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [status, setStatus] = useState('idle'); // idle | submitting | placeholder
+  const [status, setStatus] = useState('idle'); // idle | submitting
 
-  function handleSubmit(e) {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  async function handleSubmit(e) {
     e.preventDefault();
     if (!email.trim() || !password) {
       setError('Enter both your email and password.');
@@ -17,11 +28,31 @@ export default function LoginPage() {
     }
     setError('');
     setStatus('submitting');
-    // TODO: replace with a real call to POST /api/auth/login once that
-    // endpoint exists — it should check the users table, verify the
-    // password hash, and return the user's role (admin/client/agent) so
-    // this page can redirect to the right dashboard.
-    setTimeout(() => setStatus('placeholder'), 500);
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email: email.trim(), password }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || 'Something went wrong. Please try again.');
+        setStatus('idle');
+        return;
+      }
+
+      login(data.user);
+      // If RequireRole sent them here from a specific dashboard URL, return
+      // them there; otherwise go to the dashboard that matches their role.
+      const redirectTo = location.state?.from?.pathname ?? DASHBOARD_PATH_BY_ROLE[data.user.role] ?? '/';
+      navigate(redirectTo, { replace: true });
+    } catch {
+      setError('Could not reach the server. Please try again.');
+      setStatus('idle');
+    }
   }
 
   return (
@@ -69,13 +100,6 @@ export default function LoginPage() {
             </div>
 
             {error && <p className="text-sm text-red-600">{error}</p>}
-            {status === 'placeholder' && (
-              <p className="rounded-2xl bg-accent-light/40 px-4 py-3 text-sm text-ink">
-                This form isn't connected to the backend yet — once{' '}
-                <code>/api/auth/login</code> exists, this will check your
-                credentials and take you to the right dashboard.
-              </p>
-            )}
 
             <Button
               type="submit"

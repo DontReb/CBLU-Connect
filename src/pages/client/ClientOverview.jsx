@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { MOCK_CLIENT } from '../../lib/mockClient';
 import { useChecklist } from '../../lib/checklistContext';
+import { useAuth } from '../../lib/authContext';
 
 const STATUS_STYLES = {
   valid: 'bg-accent-light/50 text-accent-dark',
@@ -8,6 +9,8 @@ const STATUS_STYLES = {
   pending: 'bg-line/60 text-ink-soft',
   processing: 'bg-highlight/40 text-ink',
 };
+
+
 
 const STATUS_LABELS = {
   valid: 'Valid',
@@ -17,10 +20,15 @@ const STATUS_LABELS = {
 };
 
 export default function ClientOverview() {
+  const { user } = useAuth();
   const { checklist } = useChecklist();
+
   const completed = checklist.items.filter((item) => item.status === 'valid').length;
   const total = checklist.items.length;
-  const firstName = MOCK_CLIENT.fullName.split(' ')[0];
+
+  // Real name from the session; everything else on this page
+  // is still MOCK_CLIENT / mock context data for now.
+  const firstName = user.fullName.split(' ')[0];
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -40,12 +48,14 @@ export default function ClientOverview() {
             {completed} of {total} complete
           </span>
         </div>
+
         <div className="mb-5 h-2 overflow-hidden rounded-full bg-paper">
           <div
             className="h-full rounded-full bg-accent transition-all duration-300"
             style={{ width: `${(completed / total) * 100}%` }}
           />
         </div>
+
         <ul className="space-y-2.5">
           {checklist.items.map((item) => (
             <li
@@ -53,12 +63,16 @@ export default function ClientOverview() {
               className="flex items-center justify-between rounded-xl border border-line px-4 py-3"
             >
               <span className="text-sm text-ink">{item.label}</span>
-              <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_STYLES[item.status]}`}>
+
+              <span
+                className={`rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_STYLES[item.status]}`}
+              >
                 {STATUS_LABELS[item.status]}
               </span>
             </li>
           ))}
         </ul>
+
         <Link
           to="/dashboard/client/documents"
           className="mt-5 inline-flex text-sm font-medium text-accent-dark hover:underline"
@@ -68,9 +82,15 @@ export default function ClientOverview() {
       </div>
 
       <div className="rounded-2xl border border-line bg-panel p-6 shadow-sm">
-        <h2 className="mb-1 text-lg font-semibold text-ink">Account verification</h2>
+        <h2 className="mb-1 text-lg font-semibold text-ink">
+          Account verification
+        </h2>
+
         <p className="text-sm text-ink-soft">
-          Your account is currently <span className="font-medium text-ink">{MOCK_CLIENT.verificationStatus}</span>.
+          Your account is currently{' '}
+          <span className="font-medium text-ink">
+            {MOCK_CLIENT.verificationStatus}
+          </span>.
           This updates automatically once every required document above is marked valid.
         </p>
       </div>

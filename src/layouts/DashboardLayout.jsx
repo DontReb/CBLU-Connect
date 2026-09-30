@@ -60,7 +60,7 @@ function Icon({ name, className = 'h-5 w-5' }) {
 
 // navItems: [{ to, label, icon, end? }]. `end` is forwarded to NavLink so
 // the "Overview" link isn't highlighted while on nested sub-routes.
-export default function DashboardLayout({ roleLabel, userName, navItems, children }) {
+export default function DashboardLayout({ roleLabel, userName, navItems, onLogout, children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const shouldReduceMotion = useReducedMotion();
   const location = useLocation();
@@ -158,14 +158,15 @@ export default function DashboardLayout({ roleLabel, userName, navItems, childre
               <p className="text-xs text-ink-soft">{roleLabel}</p>
             </div>
             {/* Placeholder until a real session exists — just returns home. */}
-            <Link
-              to="/"
+                        <button
+              type="button"
+              onClick={onLogout}
               className="rounded-full border border-line p-2 text-ink-soft transition-colors hover:border-ink hover:text-ink"
               aria-label="Log out"
               title="Log out"
             >
               <Icon name="logout" />
-            </Link>
+            </button>
           </div>
         </header>
 

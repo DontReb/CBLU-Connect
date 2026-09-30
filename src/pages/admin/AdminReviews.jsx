@@ -1,9 +1,10 @@
 import Button from '../../components/ui/Button';
 import { useAdminData } from '../../lib/adminDataContext';
-import { MOCK_ADMIN } from '../../lib/mockAdmin';
+import { useAuth } from '../../lib/authContext';
 
 export default function AdminReviews() {
   const { reviews, reviewDocument } = useAdminData();
+  const { user } = useAuth();
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -40,7 +41,7 @@ export default function AdminReviews() {
               <div className="mt-4 flex flex-wrap gap-2">
                 <Button
                   type="button"
-                  onClick={() => reviewDocument(review.id, { isValid: true, reviewerName: MOCK_ADMIN.fullName })}
+                  onClick={() => reviewDocument(review.id, { isValid: true, reviewerName: user.fullName })}
                   className="px-4 py-2 text-sm"
                 >
                   Confirm valid
@@ -48,7 +49,7 @@ export default function AdminReviews() {
                 <Button
                   type="button"
                   variant="ghost"
-                  onClick={() => reviewDocument(review.id, { isValid: false, reviewerName: MOCK_ADMIN.fullName })}
+                  onClick={() => reviewDocument(review.id, { isValid: false, reviewerName: user.fullName })}
                   className="px-4 py-2 text-sm"
                 >
                   Mark invalid
