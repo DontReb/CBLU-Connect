@@ -1,5 +1,5 @@
 -- ============================================================================
--- Meridian Bank — core schema
+-- Cooperative Bank of La Union — core schema
 -- Roles: admin, client, agent (live agent)
 -- Run against a fresh Postgres database, e.g.:
 --   psql "$DATABASE_URL" -f schema.sql
