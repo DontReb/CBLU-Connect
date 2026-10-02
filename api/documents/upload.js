@@ -1,8 +1,8 @@
 import { IncomingForm } from 'formidable';
 import fs from 'fs';
 import { createWorker } from 'tesseract.js';
-import { pool } from '../_lib/db.js';
-import { validateAgainstRules } from '../_lib/validateDocument.js';
+import { pool } from '../lib/db.js';
+import { validateAgainstRules } from '../lib/validateDocument.js';
 
 // Formidable reads the multipart stream itself, so we disable the default
 // body parser for this route.

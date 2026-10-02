@@ -6,24 +6,35 @@ import { MOCK_CHECKLIST_NAME } from '../../lib/mockAdmin';
 const EMPTY_FORM = { label: '', description: '', keywords: '', isRequired: true };
 
 export default function AdminChecklists() {
-  const { checklistItems, addChecklistItem } = useAdminData();
+  const { checklistItems, checklistStatus, addChecklistItem } = useAdminData();
   const [form, setForm] = useState(EMPTY_FORM);
   const [showForm, setShowForm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     if (!form.label.trim()) return;
-    addChecklistItem({
-      label: form.label.trim(),
-      description: form.description.trim(),
-      isRequired: form.isRequired,
-      requiredKeywords: form.keywords
-        .split(',')
-        .map((keyword) => keyword.trim())
-        .filter(Boolean),
-    });
-    setForm(EMPTY_FORM);
-    setShowForm(false);
+    setSubmitError('');
+    setSubmitting(true);
+
+    try {
+      await addChecklistItem({
+        label: form.label.trim(),
+        description: form.description.trim(),
+        isRequired: form.isRequired,
+        requiredKeywords: form.keywords
+          .split(',')
+          .map((keyword) => keyword.trim())
+          .filter(Boolean),
+      });
+      setForm(EMPTY_FORM);
+      setShowForm(false);
+    } catch (err) {
+      setSubmitError(err.message || 'Something went wrong. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -91,38 +102,52 @@ export default function AdminChecklists() {
             />
             Required document
           </label>
-          <Button type="submit" className="px-4 py-2 text-sm">
-            Save item
+
+          {submitError && <p className="text-sm text-red-600">{submitError}</p>}
+
+          <Button type="submit" className="px-4 py-2 text-sm" disabled={submitting}>
+            {submitting ? 'Saving…' : 'Save item'}
           </Button>
         </form>
       )}
 
-      <ul className="mt-6 space-y-3">
-        {checklistItems.map((item) => (
-          <li key={item.id} className="rounded-2xl border border-line bg-panel p-5 shadow-sm">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <h3 className="font-medium text-ink">{item.label}</h3>
-                {item.description && (
-                  <p className="mt-0.5 max-w-md text-sm text-ink-soft">{item.description}</p>
+      {checklistStatus === 'error' && (
+        <p className="mt-6 rounded-2xl border border-line bg-panel p-5 text-sm text-red-700">
+          Couldn't load checklist items. Try refreshing the page.
+        </p>
+      )}
+
+      {checklistStatus === 'loading' && (
+        <p className="mt-6 text-sm text-ink-soft">Loading checklist items…</p>
+      )}
+
+      {checklistStatus === 'ready' && (
+        <ul className="mt-6 space-y-3">
+          {checklistItems.map((item) => (
+            <li key={item.id} className="rounded-2xl border border-line bg-panel p-5 shadow-sm">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h3 className="font-medium text-ink">{item.label}</h3>
+                  {item.description && (
+                    <p className="mt-0.5 max-w-md text-sm text-ink-soft">{item.description}</p>
+                  )}
+                </div>
+                {!item.isRequired && (
+                  <span className="shrink-0 rounded-full bg-line/60 px-2.5 py-1 text-xs font-medium text-ink-soft">
+                    Optional
+                  </span>
                 )}
               </div>
-              {!item.isRequired && (
-                <span className="shrink-0 rounded-full bg-line/60 px-2.5 py-1 text-xs font-medium text-ink-soft">
-                  Optional
-                </span>
+              {item.requiredKeywords?.length > 0 && (
+                <p className="mt-2 text-xs text-ink-soft">Required text: {item.requiredKeywords.join(', ')}</p>
               )}
-            </div>
-            {item.requiredKeywords?.length > 0 && (
-              <p className="mt-2 text-xs text-ink-soft">Required text: {item.requiredKeywords.join(', ')}</p>
-            )}
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      )}
 
       <p className="mt-6 rounded-2xl bg-accent-light/30 px-5 py-4 text-sm text-ink-soft">
-        New items are added here for now; saving to <code>checklist_items</code> and editing or
-        removing existing ones comes once the admin API is connected.
+        Editing or removing existing items isn't wired up yet — only adding new ones.
       </p>
     </div>
   );

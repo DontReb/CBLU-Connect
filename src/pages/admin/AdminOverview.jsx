@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { MOCK_CLIENTS, MOCK_CHECKLIST_NAME } from '../../lib/mockAdmin';
+import { MOCK_CHECKLIST_NAME } from '../../lib/mockAdmin';
 import { useAdminData } from '../../lib/adminDataContext';
 
 function StatCard({ label, value, to }) {
@@ -15,9 +15,9 @@ function StatCard({ label, value, to }) {
 }
 
 export default function AdminOverview() {
-  const { checklistItems, reviews } = useAdminData();
+  const { clients, clientsStatus, checklistItems, checklistStatus, reviews } = useAdminData();
   const pendingReviews = reviews.filter((review) => !review.reviewedBy).length;
-  const verifiedClients = MOCK_CLIENTS.filter((client) => client.verificationStatus === 'verified').length;
+  const verifiedClients = clients.filter((client) => client.verificationStatus === 'verified').length;
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -29,9 +29,21 @@ export default function AdminOverview() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Total clients" value={MOCK_CLIENTS.length} to="/dashboard/admin/clients" />
-        <StatCard label="Verified clients" value={verifiedClients} to="/dashboard/admin/clients" />
-        <StatCard label="Checklist items" value={checklistItems.length} to="/dashboard/admin/checklists" />
+        <StatCard
+          label="Total clients"
+          value={clientsStatus === 'ready' ? clients.length : '—'}
+          to="/dashboard/admin/clients"
+        />
+        <StatCard
+          label="Verified clients"
+          value={clientsStatus === 'ready' ? verifiedClients : '—'}
+          to="/dashboard/admin/clients"
+        />
+        <StatCard
+          label="Checklist items"
+          value={checklistStatus === 'ready' ? checklistItems.length : '—'}
+          to="/dashboard/admin/checklists"
+        />
         <StatCard label="Pending reviews" value={pendingReviews} to="/dashboard/admin/reviews" />
       </div>
     </div>
