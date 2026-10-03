@@ -7,6 +7,7 @@ const STATUS_META = {
   invalid: { label: 'Needs attention', badge: 'bg-red-100 text-red-700' },
   pending: { label: 'Not submitted', badge: 'bg-line/60 text-ink-soft' },
   processing: { label: 'Checking…', badge: 'bg-highlight/40 text-ink' },
+  error: { label: 'Upload failed', badge: 'bg-red-100 text-red-700' },
 };
 
 function ChecklistItemCard({ item, onUpload }) {
@@ -14,6 +15,7 @@ function ChecklistItemCard({ item, onUpload }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const isProcessing = item.status === 'processing';
   const meta = STATUS_META[item.status] ?? STATUS_META.pending;
+  const notesAreBad = item.status === 'invalid' || item.status === 'error';
 
   function handleFileChange(e) {
     const file = e.target.files?.[0];
@@ -22,7 +24,10 @@ function ChecklistItemCard({ item, onUpload }) {
 
   function handleUploadClick() {
     if (!selectedFile || isProcessing) return;
-    onUpload(item.id, selectedFile);
+    onUpload(item.id, selectedFile).catch(() => {
+      // Already reflected in item.status/notes via the provider — nothing
+      // more to do here, just don't let an unhandled rejection surface.
+    });
   }
 
   return (
@@ -40,7 +45,7 @@ function ChecklistItemCard({ item, onUpload }) {
       </div>
 
       {item.notes && (
-        <p className={`mt-3 text-sm ${item.status === 'invalid' ? 'text-red-700' : 'text-ink-soft'}`}>
+        <p className={`mt-3 text-sm ${notesAreBad ? 'text-red-700' : 'text-ink-soft'}`}>
           {item.notes}
         </p>
       )}
@@ -79,14 +84,26 @@ function ChecklistItemCard({ item, onUpload }) {
 }
 
 export default function ClientDocuments() {
-  const { checklist, uploadDocument } = useChecklist();
+  const { checklist, status, uploadDocument } = useChecklist();
+
+  if (status === 'loading') {
+    return <p className="mx-auto max-w-3xl text-sm text-ink-soft">Loading your checklist…</p>;
+  }
+
+  if (status === 'error') {
+    return (
+      <p className="mx-auto max-w-3xl rounded-2xl border border-line bg-panel p-5 text-sm text-red-700">
+        Couldn't load your checklist. Try refreshing the page.
+      </p>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-3xl">
       <h1 className="font-display text-2xl font-medium text-ink md:text-3xl">Documents</h1>
       <p className="mt-1 text-sm text-ink-soft">
         Upload each required document for your {checklist.name.toLowerCase()}. We'll check it
-        automatically as soon as it's in.
+        automatically as soon as it's in — OCR can take a few seconds per file.
       </p>
 
       <div className="mt-6 space-y-4">
@@ -94,12 +111,6 @@ export default function ClientDocuments() {
           <ChecklistItemCard key={item.id} item={item} onUpload={uploadDocument} />
         ))}
       </div>
-
-      <p className="mt-6 rounded-2xl bg-accent-light/30 px-5 py-4 text-sm text-ink-soft">
-        This checks against local mock validation for now. Once{' '}
-        <code>/api/documents/upload</code> is connected, "Upload" will send the file there
-        instead and show its real OCR result.
-      </p>
     </div>
   );
 }

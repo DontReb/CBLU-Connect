@@ -1,64 +1,96 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ChecklistContext } from './checklistContext';
-import { MOCK_CHECKLIST } from './mockClient';
-
-// Simulates what POST /api/documents/upload will eventually return — same
-// shape (isValid, notes) as validateAgainstRules() in api/lib/validateDocument.js
-// so swapping this for a real fetch later doesn't require rewriting the UI.
-// An item that starts out "invalid" passes on its *second* attempt, so the
-// demo shows both a first-time upload and a fix-and-resubmit working.
-function simulateValidation(item, attemptNumber) {
-  const passes = item.status !== 'invalid' || attemptNumber > 1;
-  return passes
-    ? { isValid: true, notes: 'All required terms were found in the document.' }
-    : { isValid: false, notes: 'Missing expected terms: signature block' };
-}
-
-const UPLOAD_DELAY_MS = 1200;
 
 export default function ChecklistProvider({ children }) {
-  const [checklist, setChecklist] = useState(MOCK_CHECKLIST);
-  const [, setAttempts] = useState({});
+  const [checklist, setChecklist] = useState({ name: '', items: [] });
+  const [status, setStatus] = useState('loading'); // loading | ready | error
 
-  const uploadDocument = useCallback(
-    (itemId, file) =>
-      new Promise((resolve) => {
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadChecklist() {
+      try {
+        const res = await fetch('/api/client/checklist', { credentials: 'include' });
+        if (ignore) return;
+        if (!res.ok) {
+          setStatus('error');
+          return;
+        }
+        const data = await res.json();
+        if (ignore) return;
+        setChecklist({ name: data.checklistName, items: data.items });
+        setStatus('ready');
+      } catch {
+        if (!ignore) setStatus('error');
+      }
+    }
+
+    loadChecklist();
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  // Uploads to the real OCR/validation endpoint. Sets the item to
+  // "processing" immediately (optimistic), then updates it from the real
+  // response — isValid/notes come straight from validateAgainstRules() on
+  // the server. On failure, the item gets a distinct "error" status (a
+  // request/server problem) rather than "invalid" (a document that was
+  // checked and didn't pass), so the UI doesn't conflate the two.
+  const uploadDocument = useCallback((itemId, file) => {
+    setChecklist((prev) => ({
+      ...prev,
+      items: prev.items.map((item) =>
+        item.id === itemId ? { ...item, status: 'processing', notes: undefined } : item
+      ),
+    }));
+
+    const formData = new FormData();
+    formData.append('checklistItemId', itemId);
+    formData.append('document', file);
+
+    return fetch('/api/documents/upload', {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    })
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data.error || 'Upload failed');
+        }
         setChecklist((prev) => ({
           ...prev,
           items: prev.items.map((item) =>
             item.id === itemId
-              ? { ...item, status: 'processing', fileName: file.name, notes: undefined }
+              ? {
+                  ...item,
+                  status: data.isValid ? 'valid' : 'invalid',
+                  notes: data.notes,
+                  fileName: file.name,
+                }
               : item
           ),
         }));
+        return data;
+      })
+      .catch((err) => {
+        setChecklist((prev) => ({
+          ...prev,
+          items: prev.items.map((item) =>
+            item.id === itemId
+              ? { ...item, status: 'error', notes: err.message || 'Upload failed — try again.' }
+              : item
+          ),
+        }));
+        throw err;
+      });
+  }, []);
 
-        setTimeout(() => {
-          setAttempts((prevAttempts) => {
-            const attemptNumber = (prevAttempts[itemId] || 0) + 1;
-
-            setChecklist((prev) => ({
-              ...prev,
-              items: prev.items.map((item) => {
-                if (item.id !== itemId) return item;
-                const result = simulateValidation(item, attemptNumber);
-                resolve(result);
-                return {
-                  ...item,
-                  status: result.isValid ? 'valid' : 'invalid',
-                  notes: result.notes,
-                  fileName: file.name,
-                };
-              }),
-            }));
-
-            return { ...prevAttempts, [itemId]: attemptNumber };
-          });
-        }, UPLOAD_DELAY_MS);
-      }),
-    []
+  const value = useMemo(
+    () => ({ checklist, status, uploadDocument }),
+    [checklist, status, uploadDocument]
   );
-
-  const value = useMemo(() => ({ checklist, uploadDocument }), [checklist, uploadDocument]);
 
   return <ChecklistContext.Provider value={value}>{children}</ChecklistContext.Provider>;
 }

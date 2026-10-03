@@ -3,6 +3,7 @@ import fs from 'fs';
 import { createWorker } from 'tesseract.js';
 import { pool } from '../lib/db.js';
 import { validateAgainstRules } from '../lib/validateDocument.js';
+import { requireRole } from '../lib/auth.js'; 
 
 // Formidable reads the multipart stream itself, so we disable the default
 // body parser for this route.
@@ -12,22 +13,26 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
+    if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  const client = requireRole(req, res, 'client');
+  if (!client) return;
 
   let tempFilePath;
 
   try {
     const { fields, files } = await parseForm(req);
-    const clientId = fields.clientId?.[0];
+    // The client ID comes from the session, never from the form — otherwise
+    // anyone logged in could upload a document against someone else's
+    // checklist just by changing a form field.
+    const clientId = client.sub;
     const checklistItemId = fields.checklistItemId?.[0];
     const file = files.document?.[0];
 
-    if (!clientId || !checklistItemId || !file) {
-      return res
-        .status(400)
-        .json({ error: 'clientId, checklistItemId, and document are all required' });
+    if (!checklistItemId || !file) {
+      return res.status(400).json({ error: 'checklistItemId and document are both required' });
     }
     tempFilePath = file.filepath;
 
