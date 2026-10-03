@@ -24,6 +24,36 @@ export function verifySessionToken(token) {
   return jwt.verify(token, process.env.JWT_SECRET);
 }
 
+// Reads and verifies the session cookie, returning the decoded payload or
+// null — never throws, so callers can just check truthiness.
+export function getSessionUser(req) {
+  const token = req.cookies?.[SESSION_COOKIE_NAME];
+  if (!token) return null;
+  try {
+    return verifySessionToken(token);
+  } catch {
+    return null;
+  }
+}
+
+// The frontend's RequireRole guard is easy to bypass with a direct API
+// call, so every role-restricted endpoint checks this too. Writes the
+// 401/403 response itself and returns null on failure, so the route
+// handler just does: `const user = requireRole(req, res, 'admin'); if
+// (!user) return;`
+export function requireRole(req, res, role) {
+  const user = getSessionUser(req);
+  if (!user) {
+    res.status(401).json({ error: 'Not logged in' });
+    return null;
+  }
+  if (user.role !== role) {
+    res.status(403).json({ error: 'Forbidden' });
+    return null;
+  }
+  return user;
+}
+
 // `Secure` only turns on in production, where Vercel always serves over
 // https — `vercel dev` serves plain http://localhost, and a browser
 // silently drops a Secure cookie set over http, which would break local
