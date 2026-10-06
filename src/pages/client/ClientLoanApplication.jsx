@@ -203,7 +203,8 @@ export default function ClientLoanApplication() {
           >
             Choose photo
           </Button>
-          <span className="min-w-0 flex-1 truncate text-sm text-ink-soft">
+          {/* On phones the file name drops to its own line instead of being squeezed */}
+          <span className="order-last w-full truncate text-sm text-ink-soft sm:order-none sm:w-auto sm:min-w-0 sm:flex-1">
             {scanFile?.name ?? 'No photo selected'}
           </span>
           <Button

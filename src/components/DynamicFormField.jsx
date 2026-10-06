@@ -93,7 +93,8 @@ export default function DynamicFormField({ field, value, source, onChange }) {
             From scan — please check
           </span>
         ) : (
-          field.canAutofill && (
+          // Only hint on empty fields — a scan never replaces a typed value
+          field.canAutofill && value === '' && (
             <span className="rounded-full bg-accent-light/40 px-2 py-0.5 text-[11px] font-medium text-accent-dark">
               Scan can fill this
             </span>

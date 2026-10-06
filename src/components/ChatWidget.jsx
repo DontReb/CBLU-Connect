@@ -96,7 +96,7 @@ export default function ChatWidget({ isOpen, onClose, onToggle }) {
               ))}
             </div>
             <p className="px-4 pb-2.5 text-xs text-ink-soft">
-              Can't find an answer? We'll bring in a live agent.
+              Can't find an answer? Visit or call your nearest CBLU branch.
             </p>
             <form onSubmit={handleSend} className="flex gap-2 border-t border-line p-3">
               <input
