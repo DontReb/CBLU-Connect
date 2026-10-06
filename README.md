@@ -1,19 +1,66 @@
 # CBLU Connect
 
-A web-based portal for the **Cooperative Bank of La Union (CBLU)**, built to improve
-information dissemination, client communication, and document requirements checking.
-It includes a rule-based chatbot with live-agent escalation and an assisted
-checklist system that uses OCR to validate a client's uploaded documents against
-a bank-defined set of requirements.
+A web portal for the **Cooperative Bank of La Union (CBLU)** that improves information
+dissemination, client communication and document requirements checking. Clients get a
+chatbot that can hand them to a live agent, a document checklist that checks each
+upload with OCR, and an online version of the bank's Business Loan Application Form
+that can be filled in from a photo of the paper form.
 
-Developed as a thesis project using the Rapid Application Development (RAD) model.
-The study evaluates OCR accuracy, document validation accuracy, and usability
-against applicable ISO/IEC 25010 criteria.
+Developed as a thesis project using the Rapid Application Development (RAD) model. The
+study evaluates OCR accuracy, document validation accuracy, and usability against
+applicable ISO/IEC 25010 characteristics.
 
-> **Status: active development.** This README documents what's actually built and
-> working today, what's still mock data, and what's still undecided. See
-> [Current Status](#current-status--whats-real-vs-mock) before assuming any given
-> page is backed by real data.
+---
+
+## Test accounts
+
+All three accounts share one password: **`CbluTest123!`**
+
+| Role | Name | Email | What to try |
+|---|---|---|---|
+| Client | Maria Santos | `maria.santos@cblu.test` | Upload documents, fill in or scan the loan form, chat with a live agent |
+| Administrator | Grace Fernandez | `grace.fernandez@cblu.test` | View clients, add checklist items, post announcements |
+| Live agent | Carlo Ramirez | `carlo.ramirez@cblu.test` | Claim and answer live chats, read closed chats |
+
+They are created by `db/seed-users.sql`. They are for testing only: replace or remove
+them before real clients use the system.
+
+**Demoing live chat:** a browser window can only be logged in as one person at a time.
+Open a normal window for Maria and a private (incognito) window for Carlo, side by side.
+
+1. As Maria, open the chat, ask a question, then tap **Need a person? Chat with a live agent**.
+2. As Carlo, Maria appears in the **Queue** within a few seconds. Click her, then **Claim this chat**.
+3. Message back and forth. Either side can end the chat; it then appears under Carlo's **Closed** tab.
+
+---
+
+## What each user can do
+
+**Guests** (not logged in)
+- Read about CBLU, its services and branch location.
+- Ask the chatbot, which appears on every page, about accounts, loans, requirements,
+  logging in, branches and hours.
+- Log in. Asking the chatbot for a person prompts them to log in first.
+
+**Clients**
+- See an overview: checklist progress, the latest announcements and verification status.
+- Upload a photo of each required document. OCR reads it and checks for the required
+  keywords, then shows **Valid** or **Needs attention** with the reason.
+- Fill in the Business Loan Application (Individual/Sole-Proprietorship): 41 fields in
+  5 sections, saved and resumable. A photo of the filled paper form auto-fills email,
+  mobile number and TIN, and never overwrites a value the client typed.
+- Chat with a live agent. The agent sees the conversation the client had with the bot.
+  Messages arrive within about 3 seconds, and the chat survives page changes and refreshes.
+
+**Administrators**
+- View all clients with their branch, verification status and checklist progress.
+- Add checklist items, including the keywords OCR must find in each document.
+- Post, edit and delete announcements, which clients see on their overview.
+
+**Live agents**
+- See waiting chats appear on their own, with the client's bot conversation.
+- Claim a chat (only one agent can claim each), reply, and close it.
+- Read the transcripts of closed chats.
 
 ---
 
@@ -21,13 +68,20 @@ against applicable ISO/IEC 25010 criteria.
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 19, Vite, React Router v7, Tailwind CSS v4, Motion (framer-motion) |
-| Backend | Vercel Serverless Functions (Node.js) |
-| Database | PostgreSQL, hosted on Neon via Vercel's Postgres integration |
-| Auth | bcryptjs (password hashing) + JWT sessions in an httpOnly cookie |
-| OCR | Tesseract.js |
-| File upload parsing | formidable |
-| Hosting / deployment | Vercel |
+| Frontend | React 19, Vite 8, React Router 7, Tailwind CSS 4, Motion, Leaflet (map) |
+| Backend | Vercel serverless functions (Node.js) |
+| Database | PostgreSQL on Neon, connected through Vercel |
+| Login | bcryptjs password hashing, JWT session in an HTTP-only cookie (7 days) |
+| OCR | Tesseract.js 7 |
+| File uploads | formidable |
+| Hosting | Vercel (free Hobby plan) |
+
+**How it fits together.** The browser only talks to the serverless functions in `api/`,
+and only those reach the database. Every function checks the user's session and role
+on the server, not just in the browser. OCR runs inside the upload functions. Uploaded
+images are deleted after reading; only the extracted text and the result are kept. Live
+chat has no open connection: both sides ask `api/chat.js` for new messages every few
+seconds (polling), because Vercel's free plan cannot hold connections open.
 
 ---
 
@@ -35,91 +89,97 @@ against applicable ISO/IEC 25010 criteria.
 
 ```
 CBLU-Connect/
-├── api/                          Vercel serverless functions (the backend) —
-│   │                             EVERY .js file in here counts as one function
+├── api/                          Serverless functions. EVERY .js file here is one
+│   │                             Vercel function — the free plan allows 12; this uses 11
 │   ├── auth/
-│   │   ├── login.js              POST — checks credentials, sets session cookie
-│   │   ├── logout.js             POST — clears session cookie
-│   │   └── me.js                 GET — current logged-in user from the session
+│   │   ├── login.js              POST — check email + password, set the session cookie
+│   │   ├── logout.js             POST — clear the session cookie
+│   │   └── me.js                 GET  — who is logged in
 │   ├── admin/
-│   │   ├── clients.js            GET — all clients + checklist progress (admin-only)
-│   │   └── checklist-items.js    GET/POST — checklist item definitions (admin-only)
+│   │   ├── clients.js            GET  — all clients + checklist progress
+│   │   └── checklist-items.js    GET/POST — checklist items
 │   ├── client/
-│   │   └── checklist.js          GET — the logged-in client's own checklist + status
+│   │   └── checklist.js          GET  — the client's own checklist and statuses
 │   ├── documents/
-│   │   └── upload.js             POST — OCR + validate an uploaded document
+│   │   └── upload.js             POST — OCR an uploaded document and check its keywords
 │   ├── forms/
-│   │   ├── application.js        GET/PUT — loan form template + the client's saved values
-│   │   └── ocr.js                POST — scan a photo of the paper loan form, auto-fill 3 fields
-│   ├── announcements.js          GET (anyone logged in) / POST, PUT, DELETE (admin-only)
-│   └── chat.js                   Live chat, client ↔ agent: start, queue, claim, send,
-│                                 close (one file, ?action=…; both sides poll every few seconds)
+│   │   ├── application.js        GET/PUT — loan form fields + the client's saved answers
+│   │   └── ocr.js                POST — scan a photo of the paper loan form
+│   ├── announcements.js          GET (any logged-in user) · POST/PUT/DELETE (admin)
+│   └── chat.js                   Live chat: start, queue, claim, send, close (?action=…)
 │
-├── server/                       Shared backend helpers — kept OUTSIDE api/ so they
-│   │                             don't count toward Vercel's 12-function free limit
-│   ├── db.js                     Postgres connection pool
-│   ├── auth.js                   Password hashing, JWT, session cookies, requireRole()
-│   ├── validateDocument.js       Keyword-matching logic for OCR'd text
-│   ├── ocr.js                    Shared Tesseract runner (caches language data in /tmp)
-│   └── formAutofill.js           Pattern matching for the loan form's auto-fill fields
+├── server/                       Shared backend code, kept OUTSIDE api/ so it doesn't
+│   │                             count as a function
+│   ├── auth.js                   Password hashing, sessions, requireRole()
+│   ├── db.js                     Database connection (SSL always on)
+│   ├── ocr.js                    Tesseract.js runner + accepted image types
+│   ├── validateDocument.js       Keyword check for OCR text
+│   └── formAutofill.js           Finds email, mobile number and TIN in OCR text
 │
 ├── db/
-│   ├── Schema.sql                Full schema — 12 tables, run this first
-│   ├── seed.sql                  One checklist + its 3 required items
-│   ├── seed-users.sql            One test account per role (admin/client/agent)
+│   ├── Schema.sql                Core tables (users, chats, checklists, documents)
+│   ├── seed.sql                  The New Savings Account checklist + 3 required items
+│   ├── seed-users.sql            The three test accounts
 │   ├── forms_schema.sql          Loan application form tables
-│   ├── forms_seed.sql            The Individual/Sole-Prop. loan form — 41 fields
+│   ├── forms_seed.sql            The Individual/Sole-Proprietorship loan form (41 fields)
 │   ├── announcements_schema.sql  Announcements table
-│   └── run-sql.js                Helper: node db/run-sql.js <file> — runs a .sql
-│                                  file against DATABASE_URL. Needed because Neon's
-│                                  browser Query editor can't run multi-statement files.
+│   └── run-sql.js                node db/run-sql.js <file> — runs a .sql file
 │
-└── src/
-    ├── App.jsx                   Routes, page-transition animation, auth/role guards
-    ├── layouts/
-    │   └── DashboardLayout.jsx   Shared sidebar+topbar shell for all 3 dashboards
-    ├── components/
-    │   ├── RequireRole.jsx       Route guard — redirects by auth state/role
-    │   ├── DynamicFormField.jsx  Draws one database-defined form field (loan form)
-    │   ├── ChatMessageBubble.jsx Shared chat bubble (agent queue + closed sessions)
-    │   ├── ChatWidget.jsx        The chatbot — rendered once in App.jsx, shown on every page
-    │   └── ...                   Landing page sections (Hero, Features, About, etc.)
-    ├── lib/
-    │   ├── authContext.js / AuthProvider.jsx         Session state, login/logout
-    │   ├── checklistContext.js / ChecklistProvider.jsx   Client's checklist + upload
-    │   ├── adminDataContext.js / AdminDataProvider.jsx   Admin clients + checklist items
-    │   ├── agentSessionsContext.js / AgentSessionsProvider.jsx   Agent's live chat queue
-    │   ├── chatApi.js            Calls api/chat.js (shared by the chat widget + agent pages)
-    │   ├── chatContext.js / ChatProvider.jsx   Whether the site-wide chatbot is open
-    │   ├── mockClient.js / mockAdmin.js   Remaining placeholder data
-    │   └── chatRules.js          Rule-based chatbot replies (+ which messages mean "get me a person")
-    └── pages/
-        ├── LandingPage.jsx, LoginPage.jsx
-        ├── client/                Overview, Documents, Loan Application, Profile + layout
-        ├── admin/                 Overview, Clients, Announcements, Checklists, Reviews + layout
-        └── agent/                 Queue, Closed sessions + dashboard layout
+├── src/
+│   ├── App.jsx                   Routes, role guards, and the site-wide chatbot
+│   ├── layouts/DashboardLayout.jsx   Sidebar + top bar shared by all dashboards
+│   ├── components/
+│   │   ├── ChatWidget.jsx        The chatbot + live chat, shown on every page
+│   │   ├── DynamicFormField.jsx  Draws one loan form field from the database
+│   │   ├── ChatMessageBubble.jsx Chat bubble for the agent pages
+│   │   ├── RequireRole.jsx       Sends users to /login or their own dashboard
+│   │   └── …                     Landing page sections (Hero, About, Features, map…)
+│   ├── lib/
+│   │   ├── chatRules.js          Chatbot replies, and which messages mean "get me a person"
+│   │   ├── chatApi.js            Calls api/chat.js
+│   │   ├── *Context.js / *Provider.jsx   Shared state: login, chat, checklist,
+│   │   │                                 admin data, agent queue
+│   │   └── mockClient.js / mockAdmin.js  Remaining sample data (see status below)
+│   └── pages/
+│       ├── LandingPage.jsx, LoginPage.jsx
+│       ├── client/               Overview, Documents, Loan Application, Profile
+│       ├── admin/                Overview, Clients, Announcements, Checklists, Reviews
+│       └── agent/                Queue, Closed
+│
+├── eng.traineddata               Tesseract's English language file (packed into the OCR
+│                                 functions by vercel.json)
+└── vercel.json                   Page routing, OCR time limits, files packed with OCR
 ```
 
 ---
 
-## Getting started
+## Running it on your computer
 
-### 1. Install dependencies
+**1. Install**
 
 ```
 npm install
 ```
 
-### 2. Set up the database
+**2. Environment variables.** Create `.env.local` in the project root. It is already
+gitignored; never commit it.
 
-You need a hosted Postgres database — Vercel Postgres (powered by Neon) is what
-this project uses. Create one from your Vercel project's Storage tab (or
-`Add New → Store → Neon`), which automatically injects `DATABASE_URL` into your
-Vercel project's environment variables.
+```
+DATABASE_URL=postgresql://...   # from your Neon database (Vercel → Storage)
+JWT_SECRET=...                  # any long random string
+```
 
-Then run the schema and seed files, in this order, using the helper script (plain
-`node`, no extra tools needed — this works around Neon's browser Query editor not
-supporting files with multiple SQL statements):
+Generate a `JWT_SECRET` with:
+
+```
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Add both to Vercel too (Settings → Environment Variables). `vercel dev` reads the
+Development values from Vercel once the project is linked.
+
+**3. Database.** Run each file once, in this order. Neon's browser query editor can't
+run files with several statements, so use the helper script:
 
 ```
 node db/run-sql.js db/Schema.sql
@@ -130,143 +190,88 @@ node db/run-sql.js db/forms_seed.sql
 node db/run-sql.js db/announcements_schema.sql
 ```
 
-If your database already has the first three, run only the last three. Each
-file is meant to run **once** — running a schema file twice fails with
-"already exists", which is harmless (nothing changes).
+An "already exists" error means that file has already been run. If your database has
+loan form or announcement tables from an older version of this project, drop them
+first and then run the last three files again.
 
-### 3. Environment variables
-
-Create `.env.local` in the project root (already gitignored — never commit this):
-
-```
-DATABASE_URL=postgresql://...    # from your Neon/Vercel Postgres database (pooled connection)
-JWT_SECRET=...                   # any long random string, used to sign session cookies
-```
-
-Generate a `JWT_SECRET` with:
-
-```
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
-
-Add both variables in Vercel's dashboard too (Project Settings → Environment
-Variables → Development/Preview/Production) — `vercel dev` pulls the Development
-environment from Vercel's cloud once a project is linked, so a variable that only
-exists locally may not actually be picked up.
-
-### 4. Run it
+**4. Start it**
 
 ```
 vercel dev
 ```
 
-**Not** `npm run dev` — that only serves the frontend. The `api/` serverless
-functions need the Vercel CLI's dev runtime to work locally at all.
+Use `vercel dev`, not `npm run dev`. `npm run dev` serves only the website, without
+the `api/` functions.
 
 ---
 
-## Test accounts
+## Deploying on Vercel
 
-Seeded by `db/seed-users.sql`, all sharing one password:
-
-| Role | Email | Password |
-|---|---|---|
-| Admin | `grace.fernandez@cblu.test` | `CbluTest123!` |
-| Client | `maria.santos@cblu.test` | `CbluTest123!` |
-| Agent | `carlo.ramirez@cblu.test` | `CbluTest123!` |
+- **Branches.** Every pushed branch gets its own preview address. The `main` branch is
+  the live site.
+- **Who can open it.** Preview addresses ask for a Vercel login by default; the main
+  (production) address is public. Present from the production address.
+- **Environment variables.** `DATABASE_URL` and `JWT_SECRET` need **Production** (and
+  **Preview**, for preview links) ticked. Redeploy after changing them.
+- **12-function limit.** The free plan allows 12 functions per deployment, and every
+  `.js` file in `api/` counts. This project uses 11. Put shared code in `server/`, and
+  add a new action to an existing endpoint rather than a new file where possible.
+- **OCR.** `vercel.json` gives the two OCR functions 60 seconds. It also packs
+  Tesseract's engine files and `eng.traineddata` into them; without that, OCR crashes
+  once deployed.
+- **Before a demo.** Neon's free database sleeps when unused, so the first request after
+  a while takes a few extra seconds. Open the site and log in once beforehand.
 
 ---
 
-## Current status — what's real vs. mock
+## Current status
 
 | Feature | Status |
 |---|---|
-| Login / logout / sessions | ✅ Real — bcrypt + JWT cookie, checked server-side on every protected route |
-| Route guards by role | ✅ Real — `RequireRole` redirects to `/login` or the correct dashboard |
-| Admin → Clients table | ✅ Real — live query against `users` + `client_profiles` |
-| Admin → Checklists (view + add item) | ✅ Real — reads/writes `checklist_items`. Editing/deleting existing items is **not** built yet |
-| Client → Documents (upload) | ✅ Real — real file upload → Tesseract OCR → keyword validation → 3 DB writes |
-| Client → Overview (checklist progress) | ✅ Real — reflects the same live checklist state as Documents |
-| Admin → Overview (stat cards) | ✅ Real for clients/checklist-item counts. "Pending reviews" count is still mock |
-| Client → Loan Application | ✅ Real — 41-field form from the database, saved per client. Scanning a photo of the paper form auto-fills email, mobile number and TIN only, and never overwrites a typed value |
-| Admin → Announcements / Client → Overview card | ✅ Real — admins post/edit/delete; clients see the latest 3 |
-| Admin → Reviews (document review queue) | ⬜ Mock — `MOCK_REVIEWS` in `mockAdmin.js`, not connected to `document_validations` |
-| Agent → Queue / Closed sessions | ✅ Real — waiting chats appear on their own; claim, reply, close; closed chats keep their transcript |
-| Chatbot (every page) | ✅ Rule-based replies (`chatRules.js`) in the browser. A logged-in client who asks for a person is handed to a live agent (`api/chat.js`), with the bot conversation as context. Messages arrive within ~3 seconds (polling — Vercel's free plan can't keep connections open). Visitors who aren't logged in are asked to log in first. `chatbot_rules` in the database isn't used yet — replies live in `chatRules.js` |
-| Client → Profile page | ⬜ Partially mock — name comes from the real session; email/phone/branch/account number/verification status are still `MOCK_CLIENT` |
-| Original uploaded document files | ⬜ Not persisted anywhere. OCR runs on the temp file, then it's deleted — only the extracted text and validation result are kept. See [Open design question](#open-design-question-should-original-files-be-kept) |
+| Login, logout, role-based pages and API | Done |
+| Chatbot on every page (rule-based replies in `chatRules.js`) | Done |
+| Live chat between client and agent | Done — polling every 3–4 seconds |
+| Client: document checklist with OCR validation | Done — JPG, PNG or WebP images |
+| Client: loan application form + photo scan | Done — Individual/Sole-Proprietorship form |
+| Client: overview with announcements | Done — verification status is still sample data |
+| Client: profile page | Partial — name is real; other fields are sample data |
+| Admin: clients, checklist items (add), announcements | Done |
+| Admin: overview counts | Partial — pending-review count is sample data |
+| Admin: document review queue | Sample data only, not yet connected |
+| Agent: queue, claim, reply, close, closed chats | Done |
 
 ---
 
-## Deploying on Vercel's free (Hobby) plan
+## Known gaps
 
-- **12-function limit.** Every `.js` file inside `api/` becomes one serverless
-  function, and the Hobby plan allows 12 per deployment. This branch uses 11.
-  Put shared helper code in `server/`, never in `api/`, and prefer adding a
-  method to an existing endpoint over adding a new file.
-- **OCR time limit.** `vercel.json` gives the two OCR endpoints 60 seconds,
-  which is valid on every Hobby setup. Test a scan on the live site with the
-  exact photo you plan to demo before presenting.
-- **Production environment variables.** `DATABASE_URL` and `JWT_SECRET` must
-  have **Production** ticked in Vercel → Settings → Environment Variables,
-  not just Development.
-
-## Known gaps / not yet implemented
-
-- **Checklist item editing/deleting** — only adding new items works from the admin UI.
-- **Admin document review queue** isn't wired to real data (see table above).
-- **Live chat** is for logged-in clients only, and there's no notification when
-  no agent is online — a client just waits in the queue.
-- **Client profile fields** beyond the name are mock.
-- **Loan application** — no PDF download/print yet; the repeating tables
-  (trade references, existing deposits/loans/credit cards) and the
-  Cooperative/Partnership/Corporation form aren't included; admins can't
-  view submitted applications yet.
-- A cosmetic leftover: `db/Schema.sql`'s header comment says "Meridian Bank"
-  instead of CBLU — harmless (it's a SQL comment), just never corrected.
-
-### Open design question: should original files be kept?
-
-Right now a document upload runs through OCR and is then deleted — only the
-extracted text, validation result, and file *name* are kept. This means the admin
-Reviews page (once wired up) can only ever show the automated OCR result, never
-the actual scanned image, for a human to double check. The alternative is adding
-object storage (Vercel Blob or similar) and a `storage_path` column on
-`document_uploads`. Not yet decided — worth settling before the Reviews queue
-gets wired to real data, since it changes that endpoint's shape.
+- **Uploads are images only.** OCR can't read PDFs or iPhone HEIC photos, so those are
+  refused with a message asking for a JPG, PNG or WebP.
+- **Original document images aren't kept.** Only the OCR text and result are saved, so
+  an admin review screen could never show the actual image. Keeping images would need
+  file storage (for example Vercel Blob) and a new column on `document_uploads`.
+- **Checklist items** can be added but not yet edited or removed.
+- **Loan form:** there's no PDF download or print yet. The repeating tables (trade
+  references, existing deposits, loans and credit cards) and the
+  Cooperative/Partnership/Corporation form aren't included. Admins can't view
+  submitted applications yet.
+- **Live chat** is for logged-in clients only. There is no "no agent online" notice;
+  a client simply waits in the queue.
+- **Chatbot replies** live in `chatRules.js`. The `chatbot_rules` table exists but isn't
+  used yet.
 
 ---
 
-## Pending decisions (waiting on the bank / thesis adviser)
+## Still waiting on CBLU
 
-The checklist items currently seeded (**Valid Government ID**, **Proof of
-Billing**, **Signature Specimen Card**) are placeholders. Four questions are out
-with the team for confirmation, and the answers will drive real changes across
-multiple pages:
+- The final list of documents clients must upload, with the keywords each must contain.
+  This drives `db/seed.sql` and the admin Checklists page.
+- The information the bank needs to open an account. This may add fields to
+  `client_profiles`.
 
-1. **Which documents can clients actually upload?** — drives `db/seed.sql`, the
-   admin Checklists page, the client Documents page, and each item's
-   `validation_rules` keyword list.
-2. **What does a client need to see on their dashboard?** — drives
-   `ClientOverview.jsx` and `ClientProfile.jsx`.
-3. **What does an admin need to see on their dashboard?** — drives
-   `AdminOverview.jsx`, `AdminClients.jsx`, and what the Reviews queue should
-   surface.
-4. **What information does the bank need from a client to open an account?** —
-   may mean new columns on `client_profiles`, or new fields with their own
-   validation rules.
+## Next steps
 
----
-
-## Roadmap
-
-Rough order, each one builds on the last:
-
-1. Finalize checklist items once the team's answers come back; update
-   `db/seed.sql` and re-seed.
-2. Decide the original-file storage question (above), then wire the admin
-   Reviews queue to real data.
-3. Build out the client Profile page with real `client_profiles` data.
-4. Checklist item editing and deletion from the admin UI.
-5. Optionally move chatbot replies from `chatRules.js` into the `chatbot_rules`
-   table so admins can edit them.
+1. Load CBLU's final document list into the checklist.
+2. Decide whether to keep original images, then connect the admin review queue.
+3. Fill the client profile from `client_profiles`.
+4. Allow editing and removing checklist items.
+5. Optionally move chatbot replies into the `chatbot_rules` table so admins can edit them.
