@@ -1,4 +1,4 @@
-import { verifySessionToken, SESSION_COOKIE_NAME } from '../lib/auth.js';
+import { verifySessionToken, SESSION_COOKIE_NAME } from '../../server/auth.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {

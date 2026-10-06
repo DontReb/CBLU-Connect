@@ -1,19 +1,19 @@
 import { IncomingForm } from 'formidable';
 import fs from 'fs';
-import { createWorker } from 'tesseract.js';
-import { pool } from '../lib/db.js';
-import { validateAgainstRules } from '../lib/validateDocument.js';
-import { requireRole } from '../lib/auth.js'; 
+import { pool } from '../../server/db.js';
+import { validateAgainstRules } from '../../server/validateDocument.js';
+import { requireRole } from '../../server/auth.js';
+import { runOcr } from '../../server/ocr.js';
 
 // Formidable reads the multipart stream itself, so we disable the default
-// body parser for this route.
+// body parser for this route. The time limit for this function is set in
+// vercel.json ("functions"), since OCR can run past the default.
 export const config = {
   api: { bodyParser: false },
-  maxDuration: 60, // OCR + DB writes can run past the 10s default — raise it
 };
 
 export default async function handler(req, res) {
-    if (req.method !== 'POST') {
+  if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
@@ -47,12 +47,7 @@ export default async function handler(req, res) {
     const checklistItem = itemResult.rows[0];
 
     // 2. Run OCR on the uploaded file
-    const worker = await createWorker('eng');
-    const { data } = await worker.recognize(tempFilePath);
-    await worker.terminate();
-
-    const extractedText = data.text;
-    const ocrConfidence = data.confidence; // 0-100, from Tesseract
+    const { text: extractedText, confidence: ocrConfidence } = await runOcr(tempFilePath);
 
     // 3. Validate the extracted text against the item's rules
     const { isValid, matchedKeywords, notes } = validateAgainstRules(

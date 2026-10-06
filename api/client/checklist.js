@@ -1,5 +1,5 @@
-import { pool } from '../lib/db.js';
-import { requireRole } from '../lib/auth.js';
+import { pool } from '../../server/db.js';
+import { requireRole } from '../../server/auth.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {

@@ -1,5 +1,9 @@
 {
   "rewrites": [
     { "source": "/:path((?!api/|@|.*\\.).*)", "destination": "/index.html" }
-  ]
+  ],
+  "functions": {
+    "api/documents/upload.js": { "maxDuration": 60 },
+    "api/forms/ocr.js": { "maxDuration": 60 }
+  }
 }

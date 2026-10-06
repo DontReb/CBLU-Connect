@@ -1,5 +1,5 @@
-import { pool } from '../lib/db.js';
-import { verifyPassword, signSessionToken, setSessionCookie } from '../lib/auth.js';
+import { pool } from '../../server/db.js';
+import { verifyPassword, signSessionToken, setSessionCookie } from '../../server/auth.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
