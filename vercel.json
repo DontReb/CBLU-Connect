@@ -3,7 +3,13 @@
     { "source": "/:path((?!api/|@|.*\\.).*)", "destination": "/index.html" }
   ],
   "functions": {
-    "api/documents/upload.js": { "maxDuration": 60 },
-    "api/forms/ocr.js": { "maxDuration": 60 }
+    "api/documents/upload.js": {
+      "maxDuration": 60,
+      "includeFiles": "{node_modules/tesseract.js-core/*.wasm,eng.traineddata}"
+    },
+    "api/forms/ocr.js": {
+      "maxDuration": 60,
+      "includeFiles": "{node_modules/tesseract.js-core/*.wasm,eng.traineddata}"
+    }
   }
 }
