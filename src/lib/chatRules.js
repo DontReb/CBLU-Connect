@@ -7,16 +7,15 @@
 // Keywords match whole words only, so "hi" matches "hi there" but not
 // "this" or "which". List plurals separately ("loan", "loans").
 //
-// This is frontend-only for now. It doesn't save the conversation or reach
-// a real person — api/chat/message.js (reading chatbot_rules from the
-// database and creating a chat_sessions row) isn't built yet, so the
-// replies below say so honestly instead of promising a live agent.
+// The bot itself runs in the browser. A rule with `action: 'live-agent'`
+// doesn't just reply — ChatWidget.jsx hands the conversation to a real
+// agent through api/chat.js (logged-in clients only).
 
 export const CHAT_RULES = [
   {
-    keywords: ['agent', 'human', 'person', 'representative', 'staff', 'talk to someone', 'real person'],
-    reply:
-      "Live chat with a CBLU staff member isn't available yet on this portal. For now, please visit or call your nearest CBLU branch and our team will be glad to help.",
+    keywords: ['agent', 'live agent', 'human', 'person', 'representative', 'staff', 'talk to someone', 'real person'],
+    action: 'live-agent',
+    reply: 'Sure — let me connect you with a live agent.',
   },
   {
     keywords: ['password', 'forgot', 'log in', 'login', 'sign in', 'signin', 'locked', "can't log in", 'cannot log in'],
@@ -75,7 +74,7 @@ export const CHAT_RULES = [
 ];
 
 const FALLBACK_REPLY =
-  "Sorry, I don't have an answer for that yet. Try asking about opening a savings account, business loans, document requirements, or logging in — or visit your nearest CBLU branch.";
+  "Sorry, I don't have an answer for that yet. Try asking about opening a savings account, business loans, document requirements, or logging in — or tap \"Chat with a live agent\" below.";
 
 function escapeRegExp(text) {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -87,8 +86,16 @@ function containsKeyword(text, keyword) {
   return new RegExp(`(^|[^a-z0-9])${escapeRegExp(keyword)}($|[^a-z0-9])`).test(text);
 }
 
-export function matchRule(input) {
+function findRule(input) {
   const text = input.toLowerCase();
-  const hit = CHAT_RULES.find((rule) => rule.keywords.some((keyword) => containsKeyword(text, keyword)));
-  return hit ? hit.reply : FALLBACK_REPLY;
+  return CHAT_RULES.find((rule) => rule.keywords.some((keyword) => containsKeyword(text, keyword)));
+}
+
+export function matchRule(input) {
+  return findRule(input)?.reply ?? FALLBACK_REPLY;
+}
+
+// True when the message is asking for a person rather than the bot.
+export function wantsLiveAgent(input) {
+  return findRule(input)?.action === 'live-agent';
 }

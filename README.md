@@ -52,8 +52,8 @@ CBLU-Connect/
 │   │   ├── application.js        GET/PUT — loan form template + the client's saved values
 │   │   └── ocr.js                POST — scan a photo of the paper loan form, auto-fill 3 fields
 │   ├── announcements.js          GET (anyone logged in) / POST, PUT, DELETE (admin-only)
-│   └── chat/
-│       └── message.js            Empty stub — chatbot backend not yet built
+│   └── chat.js                   Live chat, client ↔ agent: start, queue, claim, send,
+│                                 close (one file, ?action=…; both sides poll every few seconds)
 │
 ├── server/                       Shared backend helpers — kept OUTSIDE api/ so they
 │   │                             don't count toward Vercel's 12-function free limit
@@ -88,10 +88,11 @@ CBLU-Connect/
     │   ├── authContext.js / AuthProvider.jsx         Session state, login/logout
     │   ├── checklistContext.js / ChecklistProvider.jsx   Client's checklist + upload
     │   ├── adminDataContext.js / AdminDataProvider.jsx   Admin clients + checklist items
-    │   ├── agentSessionsContext.js / AgentSessionsProvider.jsx   Agent chat queue (mock)
+    │   ├── agentSessionsContext.js / AgentSessionsProvider.jsx   Agent's live chat queue
+    │   ├── chatApi.js            Calls api/chat.js (shared by the chat widget + agent pages)
     │   ├── chatContext.js / ChatProvider.jsx   Whether the site-wide chatbot is open
-    │   ├── mockClient.js / mockAdmin.js / mockAgent.js   Remaining placeholder data
-    │   └── chatRules.js          Rule-based chatbot matching logic (frontend-only)
+    │   ├── mockClient.js / mockAdmin.js   Remaining placeholder data
+    │   └── chatRules.js          Rule-based chatbot replies (+ which messages mean "get me a person")
     └── pages/
         ├── LandingPage.jsx, LoginPage.jsx
         ├── client/                Overview, Documents, Loan Application, Profile + layout
@@ -190,8 +191,8 @@ Seeded by `db/seed-users.sql`, all sharing one password:
 | Client → Loan Application | ✅ Real — 41-field form from the database, saved per client. Scanning a photo of the paper form auto-fills email, mobile number and TIN only, and never overwrites a typed value |
 | Admin → Announcements / Client → Overview card | ✅ Real — admins post/edit/delete; clients see the latest 3 |
 | Admin → Reviews (document review queue) | ⬜ Mock — `MOCK_REVIEWS` in `mockAdmin.js`, not connected to `document_validations` |
-| Agent → Queue / Closed sessions | ⬜ Mock — `MOCK_SESSIONS` in `mockAgent.js`, nothing persisted |
-| Chatbot (every page) | ⬜ Frontend-only keyword matching (`chatRules.js`) with CBLU-specific replies. Asking for a person gets an honest "not available yet" reply — `api/chat/message.js` is still an empty stub |
+| Agent → Queue / Closed sessions | ✅ Real — waiting chats appear on their own; claim, reply, close; closed chats keep their transcript |
+| Chatbot (every page) | ✅ Rule-based replies (`chatRules.js`) in the browser. A logged-in client who asks for a person is handed to a live agent (`api/chat.js`), with the bot conversation as context. Messages arrive within ~3 seconds (polling — Vercel's free plan can't keep connections open). Visitors who aren't logged in are asked to log in first. `chatbot_rules` in the database isn't used yet — replies live in `chatRules.js` |
 | Client → Profile page | ⬜ Partially mock — name comes from the real session; email/phone/branch/account number/verification status are still `MOCK_CLIENT` |
 | Original uploaded document files | ⬜ Not persisted anywhere. OCR runs on the temp file, then it's deleted — only the extracted text and validation result are kept. See [Open design question](#open-design-question-should-original-files-be-kept) |
 
@@ -214,10 +215,8 @@ Seeded by `db/seed-users.sql`, all sharing one password:
 
 - **Checklist item editing/deleting** — only adding new items works from the admin UI.
 - **Admin document review queue** isn't wired to real data (see table above).
-- **Chatbot escalation** doesn't create a real chat session — `api/chat/message.js`
-  is an empty file.
-- **Agent dashboard** is entirely mock — claiming a chat, replying, and closing it
-  only update local React state, nothing is persisted.
+- **Live chat** is for logged-in clients only, and there's no notification when
+  no agent is online — a client just waits in the queue.
 - **Client profile fields** beyond the name are mock.
 - **Loan application** — no PDF download/print yet; the repeating tables
   (trade references, existing deposits/loans/credit cards) and the
@@ -267,9 +266,7 @@ Rough order, each one builds on the last:
    `db/seed.sql` and re-seed.
 2. Decide the original-file storage question (above), then wire the admin
    Reviews queue to real data.
-3. Wire chatbot escalation — `api/chat/message.js` should read `chatbot_rules`
-   from the database and create a real `chat_sessions` row on a fallback reply.
-4. Wire the agent dashboard (`AgentSessionsProvider`) to real `chat_sessions` /
-   `chat_messages` data — claim, reply, close.
-5. Build out the client Profile page with real `client_profiles` data.
-6. Checklist item editing and deletion from the admin UI.
+3. Build out the client Profile page with real `client_profiles` data.
+4. Checklist item editing and deletion from the admin UI.
+5. Optionally move chatbot replies from `chatRules.js` into the `chatbot_rules`
+   table so admins can edit them.
