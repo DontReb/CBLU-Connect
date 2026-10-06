@@ -190,7 +190,7 @@ export default function ClientLoanApplication() {
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp"
             onChange={handleFileChange}
             className="hidden"
           />

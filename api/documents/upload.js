@@ -3,7 +3,7 @@ import fs from 'fs';
 import { pool } from '../../server/db.js';
 import { validateAgainstRules } from '../../server/validateDocument.js';
 import { requireRole } from '../../server/auth.js';
-import { runOcr } from '../../server/ocr.js';
+import { runOcr, isSupportedImage, UNSUPPORTED_FILE_MESSAGE } from '../../server/ocr.js';
 
 // Formidable reads the multipart stream itself, so we disable the default
 // body parser for this route. The time limit for this function is set in
@@ -35,6 +35,9 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'checklistItemId and document are both required' });
     }
     tempFilePath = file.filepath;
+    if (!isSupportedImage(file)) {
+      return res.status(400).json({ error: UNSUPPORTED_FILE_MESSAGE });
+    }
 
     // 1. Look up the checklist item's validation rules
     const itemResult = await pool.query(

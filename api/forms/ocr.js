@@ -2,7 +2,7 @@ import { IncomingForm } from 'formidable';
 import fs from 'fs';
 import { pool } from '../../server/db.js';
 import { requireRole } from '../../server/auth.js';
-import { runOcr } from '../../server/ocr.js';
+import { runOcr, isSupportedImage, UNSUPPORTED_FILE_MESSAGE } from '../../server/ocr.js';
 import { extractAutofillValues } from '../../server/formAutofill.js';
 
 // POST /api/forms/ocr — multipart, one file in the "document" field.
@@ -36,6 +36,9 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'A photo of the form is required' });
     }
     tempFilePath = file.filepath;
+    if (!isSupportedImage(file)) {
+      return res.status(400).json({ error: UNSUPPORTED_FILE_MESSAGE });
+    }
 
     const templateResult = await pool.query(
       'SELECT id FROM form_templates WHERE code = $1 AND is_active = true',

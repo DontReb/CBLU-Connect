@@ -54,7 +54,7 @@ function ChecklistItemCard({ item, onUpload }) {
         <input
           ref={inputRef}
           type="file"
-          accept="image/*,.pdf"
+          accept="image/jpeg,image/png,image/webp"
           onChange={handleFileChange}
           className="hidden"
         />
