@@ -8,6 +8,7 @@ import RequireRole from './components/RequireRole';
 import ClientDashboardLayout from './pages/client/ClientDashboardLayout';
 import ClientOverview from './pages/client/ClientOverview';
 import ClientDocuments from './pages/client/ClientDocuments';
+import ClientLoanApplication from './pages/client/ClientLoanApplication';
 import ClientProfile from './pages/client/ClientProfile';
 import AdminDashboardLayout from './pages/admin/AdminDashboardLayout';
 import AdminOverview from './pages/admin/AdminOverview';
@@ -57,6 +58,7 @@ function AnimatedRoutes() {
           >
             <Route index element={<ClientOverview />} />
             <Route path="documents" element={<ClientDocuments />} />
+            <Route path="loan-application" element={<ClientLoanApplication />} />
             <Route path="profile" element={<ClientProfile />} />
           </Route>
         </Route>

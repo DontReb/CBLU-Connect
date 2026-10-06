@@ -28,7 +28,23 @@ const ICON_PATHS = {
       <path d="M9.5 13l1.75 1.75L14.5 11" />
     </>
   ),
-    // Same shape as the chat toggle button in ChatWidget, so the nav item ties
+  // A form being filled in — paper with a pencil. Used for Loan Application.
+  form: (
+    <>
+      <path d="M13 3H6v18h12v-8" />
+      <path d="M9 8h4M9 12h3M9 16h2" />
+      <path d="m15 15 5.5-5.5a1.4 1.4 0 0 0-2-2L13 13v2z" />
+    </>
+  ),
+  // Megaphone — Announcements.
+  announcement: (
+    <>
+      <path d="M4 10v4a1 1 0 0 0 1 1h3l6 4V5L8 9H5a1 1 0 0 0-1 1Z" />
+      <path d="M17.5 9a4 4 0 0 1 0 6" />
+      <path d="M8 15l1 5h2.5l-1-4.3" />
+    </>
+  ),
+  // Same shape as the chat toggle button in ChatWidget, so the nav item ties
   // visually back to the widget these sessions are escalated from.
   chat: <path d="M4 5h16v11H8l-4 4V5z" />,
   menu: <path d="M4 7h16M4 12h16M4 17h16" />,
