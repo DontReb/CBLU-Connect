@@ -35,11 +35,8 @@ against applicable ISO/IEC 25010 criteria.
 
 ```
 CBLU-Connect/
-├── api/                          Vercel serverless functions (the backend)
-│   ├── lib/
-│   │   ├── db.js                 Postgres connection pool
-│   │   ├── auth.js               Password hashing, JWT, session cookies, requireRole()
-│   │   └── validateDocument.js   Keyword-matching logic for OCR'd text
+├── api/                          Vercel serverless functions (the backend) —
+│   │                             EVERY .js file in here counts as one function
 │   ├── auth/
 │   │   ├── login.js              POST — checks credentials, sets session cookie
 │   │   ├── logout.js             POST — clears session cookie
@@ -51,13 +48,28 @@ CBLU-Connect/
 │   │   └── checklist.js          GET — the logged-in client's own checklist + status
 │   ├── documents/
 │   │   └── upload.js             POST — OCR + validate an uploaded document
+│   ├── forms/
+│   │   ├── application.js        GET/PUT — loan form template + the client's saved values
+│   │   └── ocr.js                POST — scan a photo of the paper loan form, auto-fill 3 fields
+│   ├── announcements.js          GET (anyone logged in) / POST, PUT, DELETE (admin-only)
 │   └── chat/
 │       └── message.js            Empty stub — chatbot backend not yet built
+│
+├── server/                       Shared backend helpers — kept OUTSIDE api/ so they
+│   │                             don't count toward Vercel's 12-function free limit
+│   ├── db.js                     Postgres connection pool
+│   ├── auth.js                   Password hashing, JWT, session cookies, requireRole()
+│   ├── validateDocument.js       Keyword-matching logic for OCR'd text
+│   ├── ocr.js                    Shared Tesseract runner (caches language data in /tmp)
+│   └── formAutofill.js           Pattern matching for the loan form's auto-fill fields
 │
 ├── db/
 │   ├── Schema.sql                Full schema — 12 tables, run this first
 │   ├── seed.sql                  One checklist + its 3 required items
 │   ├── seed-users.sql            One test account per role (admin/client/agent)
+│   ├── forms_schema.sql          Loan application form tables
+│   ├── forms_seed.sql            The Individual/Sole-Prop. loan form — 41 fields
+│   ├── announcements_schema.sql  Announcements table
 │   └── run-sql.js                Helper: node db/run-sql.js <file> — runs a .sql
 │                                  file against DATABASE_URL. Needed because Neon's
 │                                  browser Query editor can't run multi-statement files.
@@ -68,6 +80,7 @@ CBLU-Connect/
     │   └── DashboardLayout.jsx   Shared sidebar+topbar shell for all 3 dashboards
     ├── components/
     │   ├── RequireRole.jsx       Route guard — redirects by auth state/role
+    │   ├── DynamicFormField.jsx  Draws one database-defined form field (loan form)
     │   ├── ChatMessageBubble.jsx Shared chat bubble (agent queue + closed sessions)
     │   ├── ChatWidget.jsx        The landing-page chatbot widget
     │   └── ...                   Landing page sections (Hero, Features, About, etc.)
@@ -80,8 +93,8 @@ CBLU-Connect/
     │   └── chatRules.js          Rule-based chatbot matching logic (frontend-only)
     └── pages/
         ├── LandingPage.jsx, LoginPage.jsx
-        ├── client/                Overview, Documents, Profile + dashboard layout
-        ├── admin/                 Overview, Clients, Checklists, Reviews + layout
+        ├── client/                Overview, Documents, Loan Application, Profile + layout
+        ├── admin/                 Overview, Clients, Announcements, Checklists, Reviews + layout
         └── agent/                 Queue, Closed sessions + dashboard layout
 ```
 
@@ -110,7 +123,14 @@ supporting files with multiple SQL statements):
 node db/run-sql.js db/Schema.sql
 node db/run-sql.js db/seed.sql
 node db/run-sql.js db/seed-users.sql
+node db/run-sql.js db/forms_schema.sql
+node db/run-sql.js db/forms_seed.sql
+node db/run-sql.js db/announcements_schema.sql
 ```
+
+If your database already has the first three, run only the last three. Each
+file is meant to run **once** — running a schema file twice fails with
+"already exists", which is harmless (nothing changes).
 
 ### 3. Environment variables
 
@@ -166,13 +186,28 @@ Seeded by `db/seed-users.sql`, all sharing one password:
 | Client → Documents (upload) | ✅ Real — real file upload → Tesseract OCR → keyword validation → 3 DB writes |
 | Client → Overview (checklist progress) | ✅ Real — reflects the same live checklist state as Documents |
 | Admin → Overview (stat cards) | ✅ Real for clients/checklist-item counts. "Pending reviews" count is still mock |
+| Client → Loan Application | ✅ Real — 41-field form from the database, saved per client. Scanning a photo of the paper form auto-fills email, mobile number and TIN only, and never overwrites a typed value |
+| Admin → Announcements / Client → Overview card | ✅ Real — admins post/edit/delete; clients see the latest 3 |
 | Admin → Reviews (document review queue) | ⬜ Mock — `MOCK_REVIEWS` in `mockAdmin.js`, not connected to `document_validations` |
 | Agent → Queue / Closed sessions | ⬜ Mock — `MOCK_SESSIONS` in `mockAgent.js`, nothing persisted |
-| Chatbot (landing page widget) | ⬜ Frontend-only keyword matching (`chatRules.js`). The "I'll connect you to a live agent" line doesn't create a real `chat_sessions` row — `api/chat/message.js` is an empty stub |
+| Chatbot (landing page widget) | ⬜ Frontend-only keyword matching (`chatRules.js`) with CBLU-specific replies. Asking for a person gets an honest "not available yet" reply — `api/chat/message.js` is still an empty stub |
 | Client → Profile page | ⬜ Partially mock — name comes from the real session; email/phone/branch/account number/verification status are still `MOCK_CLIENT` |
 | Original uploaded document files | ⬜ Not persisted anywhere. OCR runs on the temp file, then it's deleted — only the extracted text and validation result are kept. See [Open design question](#open-design-question-should-original-files-be-kept) |
 
 ---
+
+## Deploying on Vercel's free (Hobby) plan
+
+- **12-function limit.** Every `.js` file inside `api/` becomes one serverless
+  function, and the Hobby plan allows 12 per deployment. This branch uses 11.
+  Put shared helper code in `server/`, never in `api/`, and prefer adding a
+  method to an existing endpoint over adding a new file.
+- **OCR time limit.** `vercel.json` gives the two OCR endpoints 60 seconds,
+  which is valid on every Hobby setup. Test a scan on the live site with the
+  exact photo you plan to demo before presenting.
+- **Production environment variables.** `DATABASE_URL` and `JWT_SECRET` must
+  have **Production** ticked in Vercel → Settings → Environment Variables,
+  not just Development.
 
 ## Known gaps / not yet implemented
 
@@ -183,6 +218,10 @@ Seeded by `db/seed-users.sql`, all sharing one password:
 - **Agent dashboard** is entirely mock — claiming a chat, replying, and closing it
   only update local React state, nothing is persisted.
 - **Client profile fields** beyond the name are mock.
+- **Loan application** — no PDF download/print yet; the repeating tables
+  (trade references, existing deposits/loans/credit cards) and the
+  Cooperative/Partnership/Corporation form aren't included; admins can't
+  view submitted applications yet.
 - A cosmetic leftover: `db/Schema.sql`'s header comment says "Meridian Bank"
   instead of CBLU — harmless (it's a SQL comment), just never corrected.
 
