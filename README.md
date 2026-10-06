@@ -275,3 +275,7 @@ the `api/` functions.
 3. Fill the client profile from `client_profiles`.
 4. Allow editing and removing checklist items.
 5. Optionally move chatbot replies into the `chatbot_rules` table so admins can edit them.
+
+
+## Owner
+**Liv Clarence Torres**
