@@ -72,8 +72,10 @@ export default function AgentQueue() {
   // of `queue` — that naturally sends the view back to the empty state.
   const selected = queue.find((session) => session.id === selectedId) ?? null;
 
+  // Height leaves room at the bottom of the screen for the site-wide chat
+  // button, so it never sits on top of "Claim this chat" or the reply box.
   return (
-    <div className="mx-auto flex h-[calc(100vh-8.5rem)] max-w-5xl overflow-hidden rounded-2xl border border-line bg-panel shadow-sm">
+    <div className="mx-auto flex h-[calc(100vh-12.5rem)] max-w-5xl overflow-hidden rounded-2xl border border-line bg-panel shadow-sm">
       <div
         className={`w-full flex-col border-line md:flex md:w-72 md:border-r ${
           selected ? 'hidden md:flex' : 'flex'

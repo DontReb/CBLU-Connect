@@ -4,6 +4,9 @@ import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import PageTransition from './components/PageTransition';
 import AuthProvider from './lib/AuthProvider';
+import ChatProvider from './lib/ChatProvider';
+import { useChat } from './lib/chatContext';
+import ChatWidget from './components/ChatWidget';
 import RequireRole from './components/RequireRole';
 import ClientDashboardLayout from './pages/client/ClientDashboardLayout';
 import ClientOverview from './pages/client/ClientOverview';
@@ -99,12 +102,22 @@ function AnimatedRoutes() {
   );
 }
 
+// The chatbot sits outside <Routes>, so it shows on every page and keeps
+// its conversation when the visitor moves between pages.
+function SiteChat() {
+  const { isOpen, closeChat, toggleChat } = useChat();
+  return <ChatWidget isOpen={isOpen} onClose={closeChat} onToggle={toggleChat} />;
+}
+
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <AnimatedRoutes />
-      </BrowserRouter>
+      <ChatProvider>
+        <BrowserRouter>
+          <AnimatedRoutes />
+          <SiteChat />
+        </BrowserRouter>
+      </ChatProvider>
     </AuthProvider>
   );
 }

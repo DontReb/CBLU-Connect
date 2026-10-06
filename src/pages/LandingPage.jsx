@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import About from '../components/About';
@@ -8,16 +7,18 @@ import HowItWorks from '../components/HowItWorks';
 import Security from '../components/Security';
 import LocationMap from '../components/LocationMap'
 import Footer from '../components/Footer';
-import ChatWidget from '../components/ChatWidget';
+import { useChat } from '../lib/chatContext';
 
+// The chatbot itself is rendered once for the whole site in App.jsx — this
+// page's buttons just open it.
 export default function LandingPage() {
-  const [chatOpen, setChatOpen] = useState(false);
+  const { openChat } = useChat();
 
   return (
     <div>
-      <Navbar onOpenChat={() => setChatOpen(true)} />
+      <Navbar onOpenChat={openChat} />
       <main>
-        <Hero onOpenChat={() => setChatOpen(true)} />
+        <Hero onOpenChat={openChat} />
         <About />
         <History />
         <Features />
@@ -26,11 +27,6 @@ export default function LandingPage() {
         <LocationMap />
       </main>
       <Footer />
-      <ChatWidget
-        isOpen={chatOpen}
-        onToggle={() => setChatOpen((v) => !v)}
-        onClose={() => setChatOpen(false)}
-      />
     </div>
   );
 }

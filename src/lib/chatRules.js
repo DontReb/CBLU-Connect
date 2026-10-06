@@ -1,4 +1,5 @@
-// Rule-based replies for the landing-page chatbot (ChatWidget.jsx). Plain
+// Rule-based replies for the site-wide chatbot (ChatWidget.jsx, shown on
+// every page — so replies shouldn't assume which page the visitor is on). Plain
 // keyword matching, not AI: each rule lists words or phrases a visitor
 // might type, and the FIRST rule with a match wins — so more specific
 // rules sit above more general ones.
@@ -20,7 +21,7 @@ export const CHAT_RULES = [
   {
     keywords: ['password', 'forgot', 'log in', 'login', 'sign in', 'signin', 'locked', "can't log in", 'cannot log in'],
     reply:
-      'Use the Log In button at the top of this page with the email and password the bank gave you. Password reset through the portal isn\'t available yet — if you can\'t get in, please contact your branch to reset it.',
+      'Log in from the Log In button on our homepage, using the email and password the bank gave you. Password reset through the portal isn\'t available yet — if you can\'t get in, please contact your branch to reset it.',
   },
   {
     keywords: ['interest', 'interest rate', 'rate', 'rates', 'fee', 'fees', 'charges'],
@@ -30,32 +31,32 @@ export const CHAT_RULES = [
   {
     keywords: ['loan', 'loans', 'business loan', 'borrow', 'credit', 'capital', 'financing'],
     reply:
-      'For a business loan, log in and open Loan Application. You can fill in the form online, or upload a photo of the paper form you already filled out — we\'ll fill in your email, mobile number and TIN automatically, and you check the rest before saving.',
+      'For a business loan, open Loan Application in your client dashboard (log in first if you haven\'t). You can fill in the form online, or upload a photo of the paper form you already filled out — we\'ll fill in your email, mobile number and TIN automatically, and you check the rest before saving.',
   },
   {
     keywords: ['open an account', 'open account', 'new account', 'savings account', 'savings', 'account opening', 'deposit'],
     reply:
-      "To open a CBLU savings account, you'll need a valid government ID, a recent proof of billing, and a signed signature specimen card. Log in and go to Documents — it lists what you still need and checks each upload for you.",
+      "To open a CBLU savings account, you'll need a valid government ID, a recent proof of billing, and a signed signature specimen card. Go to Documents in your client dashboard — it lists what you still need and checks each upload for you.",
   },
   {
     keywords: ['requirement', 'requirements', 'document', 'documents', 'checklist', 'id', 'valid id', 'upload', 'what do i need'],
     reply:
-      "Requirements depend on what you're applying for. Once you log in, your Documents page lists each one and tells you right away whether your upload was accepted or needs another try.",
+      "Requirements depend on what you're applying for. The Documents page in your client dashboard lists each one and tells you right away whether your upload was accepted or needs another try.",
   },
   {
     keywords: ['branch', 'branches', 'atm', 'atms', 'location', 'located', 'address', 'where are you', 'near me', 'contact', 'phone', 'call', 'hotline'],
     reply:
-      'CBLU serves clients across La Union. You can find our branch on the map further down this page — or visit or call your nearest branch for directions and contact details.',
+      'CBLU serves clients across La Union. You can find our branch on the map on our homepage — or visit or call your nearest branch for directions and contact details.',
   },
   {
     keywords: ['hours', 'open today', 'opening hours', 'closing time', 'what time', 'schedule', 'holiday'],
     reply:
-      'Branch hours can change on holidays and vary by branch, so please check with your branch directly. Logged-in clients will also see any schedule changes under Announcements.',
+      'Branch hours can change on holidays and vary by branch, so please check with your branch directly. Schedule changes are also posted under Announcements on your client dashboard.',
   },
   {
     keywords: ['announcement', 'announcements', 'news', 'update', 'updates'],
     reply:
-      "Bank announcements show up on your Overview page as soon as you log in — that's where we post schedule changes and other updates.",
+      "Bank announcements show up on the Overview page of your client dashboard — that's where we post schedule changes and other updates.",
   },
   {
     keywords: ['what is cblu', 'cblu', 'cooperative bank', 'who are you', 'about'],

@@ -105,7 +105,7 @@ export default function ChatWidget({ isOpen, onClose, onToggle }) {
                 onChange={(e) => setDraft(e.target.value)}
                 placeholder="Type your question…"
                 aria-label="Your question"
-                className="flex-1 rounded-full border border-line px-4 py-2.5 text-sm"
+                className="min-w-0 flex-1 rounded-full border border-line px-4 py-2.5 text-sm"
               />
               <Button type="submit" variant="primary" className="px-4 py-2.5 text-sm">
                 Send

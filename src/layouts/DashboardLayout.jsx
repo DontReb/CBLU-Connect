@@ -193,7 +193,8 @@ export default function DashboardLayout({ roleLabel, userName, navItems, onLogou
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: shouldReduceMotion ? 0 : 0.18 }}
-            className="flex-1 px-5 py-8 md:px-8"
+            // pb-28 leaves room under the last item for the site-wide chat button
+            className="flex-1 px-5 pb-28 pt-8 md:px-8"
           >
             {children}
           </motion.main>

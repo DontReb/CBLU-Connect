@@ -82,13 +82,14 @@ CBLU-Connect/
     │   ├── RequireRole.jsx       Route guard — redirects by auth state/role
     │   ├── DynamicFormField.jsx  Draws one database-defined form field (loan form)
     │   ├── ChatMessageBubble.jsx Shared chat bubble (agent queue + closed sessions)
-    │   ├── ChatWidget.jsx        The landing-page chatbot widget
+    │   ├── ChatWidget.jsx        The chatbot — rendered once in App.jsx, shown on every page
     │   └── ...                   Landing page sections (Hero, Features, About, etc.)
     ├── lib/
     │   ├── authContext.js / AuthProvider.jsx         Session state, login/logout
     │   ├── checklistContext.js / ChecklistProvider.jsx   Client's checklist + upload
     │   ├── adminDataContext.js / AdminDataProvider.jsx   Admin clients + checklist items
     │   ├── agentSessionsContext.js / AgentSessionsProvider.jsx   Agent chat queue (mock)
+    │   ├── chatContext.js / ChatProvider.jsx   Whether the site-wide chatbot is open
     │   ├── mockClient.js / mockAdmin.js / mockAgent.js   Remaining placeholder data
     │   └── chatRules.js          Rule-based chatbot matching logic (frontend-only)
     └── pages/
@@ -190,7 +191,7 @@ Seeded by `db/seed-users.sql`, all sharing one password:
 | Admin → Announcements / Client → Overview card | ✅ Real — admins post/edit/delete; clients see the latest 3 |
 | Admin → Reviews (document review queue) | ⬜ Mock — `MOCK_REVIEWS` in `mockAdmin.js`, not connected to `document_validations` |
 | Agent → Queue / Closed sessions | ⬜ Mock — `MOCK_SESSIONS` in `mockAgent.js`, nothing persisted |
-| Chatbot (landing page widget) | ⬜ Frontend-only keyword matching (`chatRules.js`) with CBLU-specific replies. Asking for a person gets an honest "not available yet" reply — `api/chat/message.js` is still an empty stub |
+| Chatbot (every page) | ⬜ Frontend-only keyword matching (`chatRules.js`) with CBLU-specific replies. Asking for a person gets an honest "not available yet" reply — `api/chat/message.js` is still an empty stub |
 | Client → Profile page | ⬜ Partially mock — name comes from the real session; email/phone/branch/account number/verification status are still `MOCK_CLIENT` |
 | Original uploaded document files | ⬜ Not persisted anywhere. OCR runs on the temp file, then it's deleted — only the extracted text and validation result are kept. See [Open design question](#open-design-question-should-original-files-be-kept) |
 

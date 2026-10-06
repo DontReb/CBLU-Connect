@@ -270,7 +270,8 @@ export default function ClientLoanApplication() {
           </fieldset>
         ))}
 
-        <div className="sticky bottom-4 z-10 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-panel/95 px-5 py-3.5 shadow-lg shadow-ink/10 backdrop-blur">
+        {/* On phones the bar sits higher so the chat button (bottom-right) doesn't cover Save */}
+        <div className="sticky bottom-24 z-10 sm:bottom-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-panel/95 px-5 py-3.5 shadow-lg shadow-ink/10 backdrop-blur">
           <div className="text-sm">
             {saveError ? (
               <p className="text-red-700">{saveError}</p>
