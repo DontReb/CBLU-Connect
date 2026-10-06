@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MOCK_CLIENT } from '../../lib/mockClient';
 import { useChecklist } from '../../lib/checklistContext';
@@ -18,6 +19,56 @@ const STATUS_LABELS = {
   processing: 'Checking…',
   error: 'Upload failed',
 };
+
+// Latest announcements from the bank. Renders nothing while loading, on an
+// error, or when there are none — announcements are a nice-to-have here
+// and should never block or clutter the rest of the overview.
+function AnnouncementsCard() {
+  const [announcements, setAnnouncements] = useState([]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadAnnouncements() {
+      try {
+        const res = await fetch('/api/announcements', { credentials: 'include' });
+        if (!res.ok || ignore) return;
+        const data = await res.json();
+        if (!ignore) setAnnouncements(data.announcements.slice(0, 3));
+      } catch {
+        // Leave it empty — the card just won't show.
+      }
+    }
+
+    loadAnnouncements();
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  if (announcements.length === 0) return null;
+
+  return (
+    <div className="rounded-2xl border border-line bg-panel p-6 shadow-sm">
+      <h2 className="mb-3 text-lg font-semibold text-ink">Announcements</h2>
+      <ul className="space-y-4">
+        {announcements.map((announcement) => (
+          <li key={announcement.id} className="border-l-2 border-accent pl-4">
+            <p className="text-xs text-ink-soft">
+              {new Date(announcement.createdAt).toLocaleDateString('en-PH', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })}
+            </p>
+            <h3 className="font-medium text-ink">{announcement.title}</h3>
+            <p className="mt-0.5 whitespace-pre-line text-sm text-ink-soft">{announcement.body}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export default function ClientOverview() {
   const { checklist, status } = useChecklist();
@@ -50,6 +101,8 @@ export default function ClientOverview() {
           Here's where things stand with your {checklist.name.toLowerCase()} application.
         </p>
       </div>
+
+      <AnnouncementsCard />
 
       <div className="rounded-2xl border border-line bg-panel p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between">

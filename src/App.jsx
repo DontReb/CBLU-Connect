@@ -13,6 +13,7 @@ import ClientProfile from './pages/client/ClientProfile';
 import AdminDashboardLayout from './pages/admin/AdminDashboardLayout';
 import AdminOverview from './pages/admin/AdminOverview';
 import AdminClients from './pages/admin/AdminClients';
+import AdminAnnouncements from './pages/admin/AdminAnnouncements';
 import AdminChecklists from './pages/admin/AdminChecklists';
 import AdminReviews from './pages/admin/AdminReviews';
 import AgentDashboardLayout from './pages/agent/AgentDashboardLayout';
@@ -74,6 +75,7 @@ function AnimatedRoutes() {
           >
             <Route index element={<AdminOverview />} />
             <Route path="clients" element={<AdminClients />} />
+            <Route path="announcements" element={<AdminAnnouncements />} />
             <Route path="checklists" element={<AdminChecklists />} />
             <Route path="reviews" element={<AdminReviews />} />
           </Route>

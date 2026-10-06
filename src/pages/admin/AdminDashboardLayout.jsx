@@ -6,6 +6,7 @@ import { useAuth } from '../../lib/authContext';
 const NAV_ITEMS = [
   { to: '/dashboard/admin', label: 'Overview', icon: 'home', end: true },
   { to: '/dashboard/admin/clients', label: 'Clients', icon: 'user' },
+  { to: '/dashboard/admin/announcements', label: 'Announcements', icon: 'announcement' },
   { to: '/dashboard/admin/checklists', label: 'Checklists', icon: 'document' },
   { to: '/dashboard/admin/reviews', label: 'Reviews', icon: 'review' },
 ];
