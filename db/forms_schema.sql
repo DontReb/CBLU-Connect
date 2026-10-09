@@ -1,5 +1,5 @@
 -- ============================================================================
--- CBLU Connect — OCR-assisted loan application forms
+-- CBLU Connect — loan application form (filled in online, printed on paper)
 -- Run AFTER Schema.sql (reuses the users table and the set_updated_at()
 -- trigger function defined there):
 --   node db/run-sql.js db/forms_schema.sql
@@ -12,13 +12,12 @@ CREATE TYPE form_field_type AS ENUM (
 );
 
 -- ----------------------------------------------------------------------------
--- FORM TEMPLATES — one row per paper form the bank uses, e.g. the Business
--- Loan Application Form (Individual / Sole-Proprietorship).
+-- FORM TEMPLATES — one row per paper form the bank uses.
 -- ----------------------------------------------------------------------------
 
 CREATE TABLE form_templates (
     id              SERIAL PRIMARY KEY,
-    code            VARCHAR(50) UNIQUE NOT NULL,   -- stable key, e.g. 'sblaf-isp'
+    code            VARCHAR(50) UNIQUE NOT NULL,   -- stable key, e.g. 'cblu-loan-isp-2023'
     name            VARCHAR(150) NOT NULL,
     description     TEXT,
     is_active       BOOLEAN NOT NULL DEFAULT TRUE,
@@ -26,22 +25,23 @@ CREATE TABLE form_templates (
 );
 
 -- ----------------------------------------------------------------------------
--- FORM TEMPLATE FIELDS — one row per field on the form. autofill_pattern is
--- a regular expression; when it's set, a scan of the paper form tries to
--- fill this field automatically. NULL means "never auto-filled — the client
--- types it". Only fields with a shape that's unique on the page get one.
+-- FORM TEMPLATE FIELDS — one row per field filled in online.
+-- id_source names the value from a scanned ID that fills this field
+-- (lastName, firstName, middleName, suffix, birthDate, sex, nationality,
+-- address, civilStatus — see server/idParsers.js). NULL = never filled from
+-- an ID; the client types it.
 -- ----------------------------------------------------------------------------
 
 CREATE TABLE form_template_fields (
     id                SERIAL PRIMARY KEY,
     template_id       INTEGER NOT NULL REFERENCES form_templates(id) ON DELETE CASCADE,
-    field_key         VARCHAR(80) NOT NULL,      -- e.g. 'email', 'tin'
+    field_key         VARCHAR(80) NOT NULL,      -- e.g. 'b_last_name'
     label             VARCHAR(200) NOT NULL,
     section           VARCHAR(100) NOT NULL,     -- groups fields on the page
     field_type        form_field_type NOT NULL DEFAULT 'text',
-    options           JSONB,                     -- select choices, e.g. ["Single","Married"]
+    options           JSONB,                     -- select choices
     is_required       BOOLEAN NOT NULL DEFAULT FALSE,
-    autofill_pattern  TEXT,
+    id_source         VARCHAR(40),
     help_text         TEXT,
     display_order     SMALLINT NOT NULL DEFAULT 0,
     UNIQUE (template_id, field_key)
@@ -50,9 +50,9 @@ CREATE TABLE form_template_fields (
 CREATE INDEX idx_form_template_fields_template ON form_template_fields(template_id);
 
 -- ----------------------------------------------------------------------------
--- FORM SUBMISSIONS — one in-progress application per client per form.
--- Also keeps the raw text from the client's most recent scan, so what the
--- OCR actually read can be checked later.
+-- FORM SUBMISSIONS — one application per client per form. Records which ID
+-- was scanned last and how confident OCR was, but never the ID's text or
+-- image (data minimisation — only the fields the form needs are kept).
 -- ----------------------------------------------------------------------------
 
 CREATE TABLE form_submissions (
@@ -60,7 +60,8 @@ CREATE TABLE form_submissions (
     client_id             UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     template_id           INTEGER NOT NULL REFERENCES form_templates(id),
     status                VARCHAR(20) NOT NULL DEFAULT 'draft',  -- draft | submitted
-    last_ocr_text         TEXT,
+    last_id_type          VARCHAR(30),           -- e.g. 'philsys', 'drivers_license', 'passport'
+    last_scan_at          TIMESTAMPTZ,
     last_ocr_confidence   NUMERIC(5,2),
     created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -69,7 +70,7 @@ CREATE TABLE form_submissions (
 
 -- ----------------------------------------------------------------------------
 -- FORM SUBMISSION VALUES — one row per filled-in field. `source` records
--- whether the value came from a scan ('ocr') or the client typed it
+-- whether the value came from an ID scan ('ocr') or the client typed it
 -- ('manual'). A new scan never overwrites a 'manual' value.
 -- ----------------------------------------------------------------------------
 

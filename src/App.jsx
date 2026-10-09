@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
@@ -11,15 +11,15 @@ import ChatWidget from './components/ChatWidget';
 import RequireRole from './components/RequireRole';
 import ClientDashboardLayout from './pages/client/ClientDashboardLayout';
 import ClientOverview from './pages/client/ClientOverview';
-import ClientDocuments from './pages/client/ClientDocuments';
+import ClientRequirements from './pages/client/ClientRequirements';
 import ClientLoanApplication from './pages/client/ClientLoanApplication';
+import ClientLoanApplicationPrint from './pages/client/ClientLoanApplicationPrint';
 import ClientProfile from './pages/client/ClientProfile';
 import AdminDashboardLayout from './pages/admin/AdminDashboardLayout';
 import AdminOverview from './pages/admin/AdminOverview';
 import AdminClients from './pages/admin/AdminClients';
 import AdminAnnouncements from './pages/admin/AdminAnnouncements';
-import AdminChecklists from './pages/admin/AdminChecklists';
-import AdminReviews from './pages/admin/AdminReviews';
+import AdminRequirements from './pages/admin/AdminRequirements';
 import AgentDashboardLayout from './pages/agent/AgentDashboardLayout';
 import AgentQueue from './pages/agent/AgentQueue';
 import AgentClosedSessions from './pages/agent/AgentClosedSessions';
@@ -62,10 +62,13 @@ function AnimatedRoutes() {
             }
           >
             <Route index element={<ClientOverview />} />
-            <Route path="documents" element={<ClientDocuments />} />
             <Route path="loan-application" element={<ClientLoanApplication />} />
+            <Route path="requirements" element={<ClientRequirements />} />
+            <Route path="documents" element={<Navigate to="/dashboard/client/requirements" replace />} />
             <Route path="profile" element={<ClientProfile />} />
           </Route>
+          {/* Outside the dashboard layout, so only the form itself prints */}
+          <Route path="/print/loan-application" element={<ClientLoanApplicationPrint />} />
         </Route>
 
         <Route element={<RequireRole role="admin" />}>
@@ -80,8 +83,8 @@ function AnimatedRoutes() {
             <Route index element={<AdminOverview />} />
             <Route path="clients" element={<AdminClients />} />
             <Route path="announcements" element={<AdminAnnouncements />} />
-            <Route path="checklists" element={<AdminChecklists />} />
-            <Route path="reviews" element={<AdminReviews />} />
+            <Route path="requirements" element={<AdminRequirements />} />
+            <Route path="checklists" element={<Navigate to="/dashboard/admin/requirements" replace />} />
           </Route>
         </Route>
 

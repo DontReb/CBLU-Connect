@@ -25,7 +25,7 @@ export default defineConfig([
   // React rules. Without this block, every `process.env` in api/ shows up
   // as "'process' is not defined".
   {
-    files: ['api/**/*.js', 'server/**/*.js', 'db/**/*.js'],
+    files: ['api/**/*.js', 'server/**/*.js', 'db/**/*.js', 'scripts/**/*.mjs'],
     extends: [js.configs.recommended],
     languageOptions: {
       globals: globals.node,

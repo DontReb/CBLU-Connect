@@ -5,8 +5,8 @@ import { useAuth } from '../../lib/authContext';
 
 const NAV_ITEMS = [
   { to: '/dashboard/client', label: 'Overview', icon: 'home', end: true },
-  { to: '/dashboard/client/documents', label: 'Documents', icon: 'document' },
   { to: '/dashboard/client/loan-application', label: 'Loan Application', icon: 'form' },
+  { to: '/dashboard/client/requirements', label: 'Requirements', icon: 'document' },
   { to: '/dashboard/client/profile', label: 'Profile', icon: 'user' },
 ];
 

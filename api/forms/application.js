@@ -1,76 +1,61 @@
 import { pool } from '../../server/db.js';
 import { requireRole } from '../../server/auth.js';
+import { loadLoanForm, ensureSubmission, loadValues } from '../../server/loanForm.js';
 
-// One endpoint for the client's loan application (kept as a single file so
-// it only counts once toward Vercel's free-plan function limit):
-//   GET  /api/forms/application  → the form template + this client's saved values
+// The client's loan application (one file, so it counts once toward
+// Vercel's free-plan function limit):
+//   GET  /api/forms/application  → the form's fields + this client's saved values
 //   PUT  /api/forms/application  → save this client's values
 //
-// Scanning a paper form is a separate endpoint (api/forms/ocr.js) because
-// it needs multipart uploads and a longer time limit.
-
-const TEMPLATE_CODE = 'sblaf-isp';
+// Filling fields from an ID photo is api/forms/ocr.js (it needs multipart
+// uploads and a longer time limit). The printable form is built in the
+// browser from the GET response.
 
 export default async function handler(req, res) {
   const client = requireRole(req, res, 'client');
   if (!client) return;
 
-  if (req.method === 'GET') return getApplication(req, res, client);
+  if (req.method === 'GET') return getApplication(res, client);
   if (req.method === 'PUT') return saveApplication(req, res, client);
   return res.status(405).json({ error: 'Method not allowed' });
 }
 
-async function loadTemplate() {
-  const templateResult = await pool.query(
-    'SELECT id, code, name, description FROM form_templates WHERE code = $1 AND is_active = true',
-    [TEMPLATE_CODE]
-  );
-  if (templateResult.rowCount === 0) return null;
-  const template = templateResult.rows[0];
-
-  const fieldsResult = await pool.query(
-    `SELECT id, field_key AS "fieldKey", label, section, field_type AS "fieldType",
-            options, is_required AS "isRequired", help_text AS "helpText",
-            autofill_pattern IS NOT NULL AS "canAutofill"
-     FROM form_template_fields
-     WHERE template_id = $1
-     ORDER BY display_order`,
-    [template.id]
-  );
-
-  return { template, fields: fieldsResult.rows };
-}
-
-async function getApplication(req, res, client) {
+async function getApplication(res, client) {
   try {
-    const loaded = await loadTemplate();
-    if (!loaded) {
-      return res.status(404).json({ error: 'Loan application form is not set up yet' });
-    }
-    const { template, fields } = loaded;
+    const form = await loadLoanForm();
+    if (!form) return res.status(404).json({ error: 'Loan application form is not set up yet' });
+    const { template, fields } = form;
 
     const submissionResult = await pool.query(
-      `SELECT id, status, updated_at AS "updatedAt"
+      `SELECT id, status, last_id_type AS "lastIdType", last_scan_at AS "lastScanAt",
+              updated_at AS "updatedAt"
        FROM form_submissions WHERE client_id = $1 AND template_id = $2`,
       [client.sub, template.id]
     );
     const submission = submissionResult.rows[0] ?? null;
+    const values = submission ? await loadValues(pool, submission.id) : {};
 
-    const values = {};
-    if (submission) {
-      const valuesResult = await pool.query(
-        `SELECT f.field_key AS "fieldKey", v.value, v.source
-         FROM form_submission_values v
-         JOIN form_template_fields f ON f.id = v.field_id
-         WHERE v.submission_id = $1`,
-        [submission.id]
-      );
-      for (const row of valuesResult.rows) {
-        values[row.fieldKey] = { value: row.value ?? '', source: row.source };
-      }
-    }
-
-    return res.status(200).json({ template, fields, submission, values });
+    return res.status(200).json({
+      template,
+      // Database ids stay on the server; the page works with field keys.
+      fields: fields.map((field) => ({
+        fieldKey: field.fieldKey,
+        label: field.label,
+        section: field.section,
+        fieldType: field.fieldType,
+        options: field.options,
+        isRequired: field.isRequired,
+        helpText: field.helpText,
+        idSource: field.idSource,
+      })),
+      submission: submission && {
+        status: submission.status,
+        lastIdType: submission.lastIdType,
+        lastScanAt: submission.lastScanAt,
+        updatedAt: submission.updatedAt,
+      },
+      values,
+    });
   } catch (err) {
     console.error('Failed to load loan application:', err);
     return res.status(500).json({ error: 'Failed to load loan application' });
@@ -86,43 +71,40 @@ async function saveApplication(req, res, client) {
 
   let db;
   try {
-    const loaded = await loadTemplate();
-    if (!loaded) {
-      return res.status(404).json({ error: 'Loan application form is not set up yet' });
-    }
-    const { template, fields } = loaded;
-    const fieldIdByKey = new Map(fields.map((f) => [f.fieldKey, f.id]));
+    const form = await loadLoanForm();
+    if (!form) return res.status(404).json({ error: 'Loan application form is not set up yet' });
+    const fieldByKey = new Map(form.fields.map((f) => [f.fieldKey, f]));
 
     db = await pool.connect();
     await db.query('BEGIN');
-
-    const submissionResult = await db.query(
-      `INSERT INTO form_submissions (client_id, template_id)
-       VALUES ($1, $2)
-       ON CONFLICT (client_id, template_id) DO UPDATE SET updated_at = now()
-       RETURNING id, status, updated_at AS "updatedAt"`,
-      [client.sub, template.id]
-    );
-    const submission = submissionResult.rows[0];
+    const submission = await ensureSubmission(db, client.sub, form.template.id);
 
     for (const [fieldKey, entry] of Object.entries(incoming)) {
-      const fieldId = fieldIdByKey.get(fieldKey);
-      if (!fieldId) continue; // ignore anything that isn't a field on this form
+      const field = fieldByKey.get(fieldKey);
+      if (!field) continue; // ignore anything that isn't a field on this form
 
       const value = typeof entry?.value === 'string' ? entry.value.trim().slice(0, 2000) : '';
-      const source = entry?.source === 'ocr' ? 'ocr' : 'manual';
+      // 'ocr' only stands for a value that really came from a scan.
+      const source = entry?.source === 'ocr' && field.idSource ? 'ocr' : 'manual';
 
       await db.query(
         `INSERT INTO form_submission_values (submission_id, field_id, value, source)
          VALUES ($1, $2, $3, $4)
          ON CONFLICT (submission_id, field_id)
          DO UPDATE SET value = EXCLUDED.value, source = EXCLUDED.source`,
-        [submission.id, fieldId, value, source]
+        [submission.id, field.id, value, source]
       );
     }
 
     await db.query('COMMIT');
-    return res.status(200).json({ submission });
+    return res.status(200).json({
+      submission: {
+        status: submission.status,
+        lastIdType: submission.lastIdType,
+        lastScanAt: submission.lastScanAt,
+        updatedAt: submission.updatedAt,
+      },
+    });
   } catch (err) {
     if (db) await db.query('ROLLBACK').catch(() => {});
     console.error('Failed to save loan application:', err);

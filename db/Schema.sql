@@ -145,12 +145,14 @@ CREATE TRIGGER trg_chatbot_rules_updated_at
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- ============================================================================
--- OCR & document validation — the assisted checklist
+-- Requirements checklist — the documents a client prepares for a loan
+-- application. It is only a list: clients tick what they already have.
+-- No files are uploaded or stored.
 -- ============================================================================
 
 -- ----------------------------------------------------------------------------
--- REQUIREMENT CHECKLISTS — what a client is applying for, e.g. "New Savings
--- Account" or "Personal Loan". Admins define these and their items.
+-- REQUIREMENT CHECKLISTS — e.g. "Loan Application Requirements". The active
+-- one is shown to clients and printed with their application form.
 -- ----------------------------------------------------------------------------
 
 CREATE TABLE requirement_checklists (
@@ -163,11 +165,7 @@ CREATE TABLE requirement_checklists (
 );
 
 -- ----------------------------------------------------------------------------
--- CHECKLIST ITEMS — one required document per checklist, with the rules its
--- OCR'd text is checked against. Kept simple and explainable: keyword rules,
--- stored as JSONB so items can be edited without a migration.
--- e.g. validation_rules = {"requiredKeywords": ["republic of the philippines",
---                                                 "driver's license"]}
+-- CHECKLIST ITEMS — one document per row, e.g. "Proof of income".
 -- ----------------------------------------------------------------------------
 
 CREATE TABLE checklist_items (
@@ -176,59 +174,19 @@ CREATE TABLE checklist_items (
     label               VARCHAR(150) NOT NULL,
     description         TEXT,
     is_required         BOOLEAN NOT NULL DEFAULT TRUE,
-    validation_rules    JSONB NOT NULL DEFAULT '{}',
     display_order       SMALLINT NOT NULL DEFAULT 0
 );
 
 CREATE INDEX idx_checklist_items_checklist ON checklist_items(checklist_id);
 
 -- ----------------------------------------------------------------------------
--- DOCUMENT UPLOADS — one row per file a client submits against a checklist
--- item. The file itself lives in object storage; this row just tracks it.
+-- CLIENT CHECKLIST MARKS — a row means "this client has ticked this item";
+-- unticking deletes the row.
 -- ----------------------------------------------------------------------------
 
-CREATE TABLE document_uploads (
-    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    client_id           UUID NOT NULL REFERENCES users(id),
-    checklist_item_id   INTEGER NOT NULL REFERENCES checklist_items(id),
-    file_name           VARCHAR(255) NOT NULL,
-    status              VARCHAR(20) NOT NULL DEFAULT 'pending',
-                        -- pending | processed | failed
-    uploaded_at         TIMESTAMPTZ NOT NULL DEFAULT now()
+CREATE TABLE client_checklist_marks (
+    client_id           UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    checklist_item_id   INTEGER NOT NULL REFERENCES checklist_items(id) ON DELETE CASCADE,
+    marked_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (client_id, checklist_item_id)
 );
-
-CREATE INDEX idx_document_uploads_client ON document_uploads(client_id);
-CREATE INDEX idx_document_uploads_item ON document_uploads(checklist_item_id);
-
--- ----------------------------------------------------------------------------
--- DOCUMENT OCR RESULTS — the raw text an OCR engine extracted, plus its own
--- confidence score. Kept separate from validation so you can re-run
--- validation rules later without re-running OCR.
--- ----------------------------------------------------------------------------
-
-CREATE TABLE document_ocr_results (
-    id                  BIGSERIAL PRIMARY KEY,
-    document_upload_id  UUID NOT NULL REFERENCES document_uploads(id) ON DELETE CASCADE,
-    extracted_text      TEXT,
-    confidence_score    NUMERIC(5,2),  -- 0.00-100.00, from the OCR engine
-    ocr_engine          VARCHAR(50) NOT NULL DEFAULT 'tesseract.js',
-    processed_at        TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
--- ----------------------------------------------------------------------------
--- DOCUMENT VALIDATIONS — the outcome of checking OCR text against the item's
--- validation_rules. reviewed_by stays null until/unless an admin overrides
--- the automated result.
--- ----------------------------------------------------------------------------
-
-CREATE TABLE document_validations (
-    id                  BIGSERIAL PRIMARY KEY,
-    document_upload_id  UUID NOT NULL REFERENCES document_uploads(id) ON DELETE CASCADE,
-    is_valid            BOOLEAN NOT NULL,
-    matched_keywords    JSONB,
-    notes               TEXT,
-    reviewed_by         UUID REFERENCES users(id),
-    validated_at        TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-CREATE INDEX idx_document_validations_upload ON document_validations(document_upload_id);

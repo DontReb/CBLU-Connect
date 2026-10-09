@@ -1,18 +1,122 @@
--- Seeds CBLU's Loan Application Form (Individual and Sole Proprietor,
--- CBLU REV. 2023) as a digital template: 99 fields in 6 sections.
--- Run AFTER forms_schema.sql:
---   node db/run-sql.js db/forms_seed.sql
+-- ============================================================================
+-- ONE-TIME UPDATE for a database set up before the ID-scan change (Oct 2026).
+-- Run once, from the project folder:
+--   node db/run-sql.js db/migrate_id_scan.sql
 --
--- GENERATED — the same field keys are used by the print layout in
--- src/pages/client/ClientLoanApplicationPrint.jsx, so rename a key in both.
+-- What it does (one transaction — it either fully applies or not at all):
+--   1. Removes the document upload tables. Clients no longer upload their
+--      documents; the checklist is tick-only. (Deletes test uploads.)
+--   2. Replaces the old loan form tables with CBLU's 2023 form.
+--      Deletes saved loan applications — test data only.
+--   3. Adds client_checklist_marks (which items each client has ticked).
+--   4. Retires the old "New Savings Account" checklist and adds the
+--      "Loan Application Requirements" checklist.
+-- It does NOT touch users, announcements or chats.
 --
--- Not filled in online on purpose (they print blank for handwriting): bank
--- deposits, automobiles, real estate property, credit information, trade
--- references and personal references; signatures; "For Bank's Use Only".
---
--- id_source = which value from a scanned ID fills this field (see
--- server/idParsers.js). Only borrower fields that also appear on an ID get one.
---   Sections: Loan details (5), Borrower's data (25), Spouse's personal data (19), Collateral details (10), Co-borrower / co-maker 1 (20), Co-borrower / co-maker 2 (20)
+-- GENERATED from Schema.sql, forms_schema.sql, forms_seed.sql and seed.sql,
+-- so a fresh install and an updated database end up the same.
+-- ============================================================================
+
+-- 1. Document uploads out
+DROP TABLE IF EXISTS document_validations CASCADE;
+DROP TABLE IF EXISTS document_ocr_results CASCADE;
+DROP TABLE IF EXISTS document_uploads CASCADE;
+ALTER TABLE checklist_items DROP COLUMN IF EXISTS validation_rules;
+
+-- 2. Old loan form tables out, new ones in (same as forms_schema.sql + forms_seed.sql)
+DROP TABLE IF EXISTS form_submission_values CASCADE;
+DROP TABLE IF EXISTS form_submissions CASCADE;
+DROP TABLE IF EXISTS form_template_fields CASCADE;
+DROP TABLE IF EXISTS form_templates CASCADE;
+DROP TYPE IF EXISTS form_field_type CASCADE;
+
+CREATE TYPE form_field_type AS ENUM (
+    'text', 'textarea', 'number', 'date', 'email', 'tel', 'select'
+);
+
+-- ----------------------------------------------------------------------------
+-- FORM TEMPLATES — one row per paper form the bank uses.
+-- ----------------------------------------------------------------------------
+
+CREATE TABLE form_templates (
+    id              SERIAL PRIMARY KEY,
+    code            VARCHAR(50) UNIQUE NOT NULL,   -- stable key, e.g. 'cblu-loan-isp-2023'
+    name            VARCHAR(150) NOT NULL,
+    description     TEXT,
+    is_active       BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- ----------------------------------------------------------------------------
+-- FORM TEMPLATE FIELDS — one row per field filled in online.
+-- id_source names the value from a scanned ID that fills this field
+-- (lastName, firstName, middleName, suffix, birthDate, sex, nationality,
+-- address, civilStatus — see server/idParsers.js). NULL = never filled from
+-- an ID; the client types it.
+-- ----------------------------------------------------------------------------
+
+CREATE TABLE form_template_fields (
+    id                SERIAL PRIMARY KEY,
+    template_id       INTEGER NOT NULL REFERENCES form_templates(id) ON DELETE CASCADE,
+    field_key         VARCHAR(80) NOT NULL,      -- e.g. 'b_last_name'
+    label             VARCHAR(200) NOT NULL,
+    section           VARCHAR(100) NOT NULL,     -- groups fields on the page
+    field_type        form_field_type NOT NULL DEFAULT 'text',
+    options           JSONB,                     -- select choices
+    is_required       BOOLEAN NOT NULL DEFAULT FALSE,
+    id_source         VARCHAR(40),
+    help_text         TEXT,
+    display_order     SMALLINT NOT NULL DEFAULT 0,
+    UNIQUE (template_id, field_key)
+);
+
+CREATE INDEX idx_form_template_fields_template ON form_template_fields(template_id);
+
+-- ----------------------------------------------------------------------------
+-- FORM SUBMISSIONS — one application per client per form. Records which ID
+-- was scanned last and how confident OCR was, but never the ID's text or
+-- image (data minimisation — only the fields the form needs are kept).
+-- ----------------------------------------------------------------------------
+
+CREATE TABLE form_submissions (
+    id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    client_id             UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    template_id           INTEGER NOT NULL REFERENCES form_templates(id),
+    status                VARCHAR(20) NOT NULL DEFAULT 'draft',  -- draft | submitted
+    last_id_type          VARCHAR(30),           -- e.g. 'philsys', 'drivers_license', 'passport'
+    last_scan_at          TIMESTAMPTZ,
+    last_ocr_confidence   NUMERIC(5,2),
+    created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE (client_id, template_id)
+);
+
+-- ----------------------------------------------------------------------------
+-- FORM SUBMISSION VALUES — one row per filled-in field. `source` records
+-- whether the value came from an ID scan ('ocr') or the client typed it
+-- ('manual'). A new scan never overwrites a 'manual' value.
+-- ----------------------------------------------------------------------------
+
+CREATE TABLE form_submission_values (
+    id              BIGSERIAL PRIMARY KEY,
+    submission_id   UUID NOT NULL REFERENCES form_submissions(id) ON DELETE CASCADE,
+    field_id        INTEGER NOT NULL REFERENCES form_template_fields(id) ON DELETE CASCADE,
+    value           TEXT,
+    source          VARCHAR(10) NOT NULL DEFAULT 'manual'
+                    CHECK (source IN ('ocr', 'manual')),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE (submission_id, field_id)
+);
+
+CREATE INDEX idx_form_submission_values_submission ON form_submission_values(submission_id);
+
+CREATE TRIGGER trg_form_submissions_updated_at
+    BEFORE UPDATE ON form_submissions
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+CREATE TRIGGER trg_form_submission_values_updated_at
+    BEFORE UPDATE ON form_submission_values
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 INSERT INTO form_templates (code, name, description)
 VALUES (
@@ -130,3 +234,43 @@ CROSS JOIN (
     ('c2_gross_income', 'Gross monthly income', 'Co-borrower / co-maker 2', 'select', '["Less than Php 50,000.00", "Php 50,001.00 to 75,000.00", "Php 75,001.00 to 100,000.00", "Php 100,001.00 to 200,000.00", "Over Php 200,000.00"]', FALSE, NULL, NULL, 99)
 ) AS v(field_key, label, section, field_type, options, is_required, id_source, help_text, display_order)
 WHERE t.code = 'cblu-loan-isp-2023';
+
+-- 3. Tick-only checklist (same as the end of Schema.sql)
+DROP TABLE IF EXISTS client_checklist_marks CASCADE;
+
+-- ----------------------------------------------------------------------------
+-- CLIENT CHECKLIST MARKS — a row means "this client has ticked this item";
+-- unticking deletes the row.
+-- ----------------------------------------------------------------------------
+
+CREATE TABLE client_checklist_marks (
+    client_id           UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    checklist_item_id   INTEGER NOT NULL REFERENCES checklist_items(id) ON DELETE CASCADE,
+    marked_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (client_id, checklist_item_id)
+);
+
+-- 4. New checklist (same as seed.sql)
+UPDATE requirement_checklists SET is_active = FALSE WHERE is_active;
+
+WITH checklist AS (
+  INSERT INTO requirement_checklists (name, description, is_active)
+  VALUES ('Loan Application Requirements', 'Documents to bring with the printed loan application form.', TRUE)
+  RETURNING id
+)
+INSERT INTO checklist_items (checklist_id, label, description, is_required, display_order)
+SELECT checklist.id, v.label, v.description, v.is_required, v.display_order
+FROM checklist
+CROSS JOIN (
+  VALUES
+    ('Signed application form', 'Print it from Loan Application, then sign it.', TRUE, 1),
+    ('One (1) valid government-issued ID', 'Clear photocopy, front and back.', TRUE, 2),
+    ('Recent 2x2 ID picture', 'For the photo box on the application form.', TRUE, 3),
+    ('Proof of income', 'Latest ITR or BIR Form 2316, payslips for the past 2 months, or a Certificate of Employment with salary.', TRUE, 4),
+    ('Marriage contract', 'If married.', FALSE, 5),
+    ('Proof of business registration', 'If self-employed: DTI or BIR certificate of registration, and Barangay or Mayor''s permit.', FALSE, 6),
+    ('Bank statements or passbook', 'Photocopy covering the past 6 months.', FALSE, 7),
+    ('Proof of billing', 'Utility bill for the past 3 months showing your address.', FALSE, 8),
+    ('Collateral documents', 'For secured loans: photocopy of the TCT/CCT or the vehicle OR/CR, and the latest tax declaration.', FALSE, 9),
+    ('Location / vicinity map', 'For real estate collateral.', FALSE, 10)
+) AS v(label, description, is_required, display_order);

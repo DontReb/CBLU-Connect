@@ -3,7 +3,9 @@
 // Application page; nothing in here is specific to that one form.
 //
 // Props:
-//   field    — { fieldKey, label, fieldType, options, isRequired, helpText, canAutofill }
+//   field    — { fieldKey, label, fieldType, options, isRequired, helpText, idSource }
+//              options: ['A', 'B'] or grouped: [{ group: 'Secured', options: ['A', 'B'] }]
+//              idSource: set when a scanned ID can fill this field
 //   value    — current string value ('' when empty)
 //   source   — 'ocr' | 'manual' | undefined — where the value came from
 //   onChange — (fieldKey, newValue) => void
@@ -53,11 +55,21 @@ export default function DynamicFormField({ field, value, source, onChange }) {
         className={INPUT_CLASS}
       >
         <option value="">Select…</option>
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
+        {options.map((option) =>
+          typeof option === 'string' ? (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ) : (
+            <optgroup key={option.group} label={option.group}>
+              {option.options.map((choice) => (
+                <option key={choice} value={choice}>
+                  {choice}
+                </option>
+              ))}
+            </optgroup>
+          )
+        )}
       </select>
     );
   } else {
@@ -90,13 +102,13 @@ export default function DynamicFormField({ field, value, source, onChange }) {
         </label>
         {fromScan ? (
           <span className="rounded-full bg-highlight/50 px-2 py-0.5 text-[11px] font-medium text-ink">
-            From scan — please check
+            From your ID — please check
           </span>
         ) : (
           // Only hint on empty fields — a scan never replaces a typed value
-          field.canAutofill && value === '' && (
+          field.idSource && value === '' && (
             <span className="rounded-full bg-accent-light/40 px-2 py-0.5 text-[11px] font-medium text-accent-dark">
-              Scan can fill this
+              Your ID can fill this
             </span>
           )
         )}

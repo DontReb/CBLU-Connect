@@ -1,30 +1,33 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AdminDataContext } from './adminDataContext';
-import { MOCK_REVIEWS } from './mockAdmin';
 
+async function requestJson(url, options = {}) {
+  const res = await fetch(url, {
+    credentials: 'include',
+    ...options,
+    headers: options.body ? { 'Content-Type': 'application/json' } : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Something went wrong. Please try again.');
+  return data;
+}
+
+// Clients (with their application and requirements progress) and the
+// requirements checklist, shared by the admin pages.
 export default function AdminDataProvider({ children }) {
   const [clients, setClients] = useState([]);
   const [clientsStatus, setClientsStatus] = useState('loading'); // loading | ready | error
 
+  const [checklist, setChecklist] = useState(null); // { id, name, description }
   const [checklistItems, setChecklistItems] = useState([]);
   const [checklistStatus, setChecklistStatus] = useState('loading'); // loading | ready | error
-
-  // Reviews are still mock data — wiring these to a real endpoint is a
-  // separate, later step.
-  const [reviews, setReviews] = useState(MOCK_REVIEWS);
 
   useEffect(() => {
     let ignore = false;
 
     async function loadClients() {
       try {
-        const res = await fetch('/api/admin/clients', { credentials: 'include' });
-        if (ignore) return;
-        if (!res.ok) {
-          setClientsStatus('error');
-          return;
-        }
-        const data = await res.json();
+        const data = await requestJson('/api/admin/clients');
         if (ignore) return;
         setClients(data.clients);
         setClientsStatus('ready');
@@ -35,14 +38,9 @@ export default function AdminDataProvider({ children }) {
 
     async function loadChecklistItems() {
       try {
-        const res = await fetch('/api/admin/checklist-items', { credentials: 'include' });
+        const data = await requestJson('/api/admin/checklist-items');
         if (ignore) return;
-        if (!res.ok) {
-          setChecklistStatus('error');
-          return;
-        }
-        const data = await res.json();
-        if (ignore) return;
+        setChecklist(data.checklist);
         setChecklistItems(data.items);
         setChecklistStatus('ready');
       } catch {
@@ -57,47 +55,41 @@ export default function AdminDataProvider({ children }) {
     };
   }, []);
 
-  // Posts to the real endpoint and appends the DB-generated row (with its
-  // real id) to local state — throws on failure so the form can show why.
+  // Each of these throws on failure so the form calling it can show why.
   const addChecklistItem = useCallback(async (item) => {
-    const res = await fetch('/api/admin/checklist-items', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(item),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      throw new Error(data.error || 'Failed to add checklist item');
-    }
+    const data = await requestJson('/api/admin/checklist-items', { method: 'POST', body: JSON.stringify(item) });
     setChecklistItems((prev) => [...prev, data.item]);
   }, []);
 
-  // decision: { isValid, reviewerName } — sets the human-confirmed result
-  // and stamps who reviewed it, same as document_validations.reviewed_by.
-  // Still local-only for now — wiring this to a real endpoint is a
-  // separate step (the document reviews queue).
-  const reviewDocument = useCallback((reviewId, decision) => {
-    setReviews((prev) =>
-      prev.map((review) =>
-        review.id === reviewId
-          ? { ...review, isValid: decision.isValid, reviewedBy: decision.reviewerName }
-          : review
-      )
-    );
+  const updateChecklistItem = useCallback(async (id, item) => {
+    const data = await requestJson(`/api/admin/checklist-items?id=${id}`, { method: 'PUT', body: JSON.stringify(item) });
+    setChecklistItems((prev) => prev.map((existing) => (existing.id === id ? data.item : existing)));
+  }, []);
+
+  const deleteChecklistItem = useCallback(async (id) => {
+    await requestJson(`/api/admin/checklist-items?id=${id}`, { method: 'DELETE' });
+    setChecklistItems((prev) => prev.filter((existing) => existing.id !== id));
+  }, []);
+
+  // One client's ticked requirements, loaded when an admin opens their row.
+  const loadClientDetail = useCallback(async (id) => {
+    const data = await requestJson(`/api/admin/clients?id=${id}`);
+    return data.client;
   }, []);
 
   const value = useMemo(
     () => ({
       clients,
       clientsStatus,
+      checklist,
       checklistItems,
       checklistStatus,
       addChecklistItem,
-      reviews,
-      reviewDocument,
+      updateChecklistItem,
+      deleteChecklistItem,
+      loadClientDetail,
     }),
-    [clients, clientsStatus, checklistItems, checklistStatus, addChecklistItem, reviews, reviewDocument]
+    [clients, clientsStatus, checklist, checklistItems, checklistStatus, addChecklistItem, updateChecklistItem, deleteChecklistItem, loadClientDetail]
   );
 
   return <AdminDataContext.Provider value={value}>{children}</AdminDataContext.Provider>;
