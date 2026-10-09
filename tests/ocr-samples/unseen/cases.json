@@ -1,0 +1,653 @@
+{
+ "note": "Fictional people on specimen cards made by make_ids.py. Not real IDs.",
+ "cases": [
+  {
+   "name": "u1 philsys clean",
+   "condition": "clean",
+   "idType": "philsys",
+   "files": [
+    "u1_philsys_front_clean.jpg",
+    "u1_philsys_back_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "SAN JUAN",
+    "firstName": "MA. THERESA",
+    "middleName": "DOMINGO",
+    "suffix": null,
+    "birthDate": "1976-08-19",
+    "address": "56 ZAMORA ST., BRGY. 4, SAN FERNANDO CITY, LA UNION, 2500",
+    "sex": "Female",
+    "civilStatus": "Married"
+   }
+  },
+  {
+   "name": "u1 drivers_license clean",
+   "condition": "clean",
+   "idType": "drivers_license",
+   "files": [
+    "u1_drivers_license_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "SAN JUAN",
+    "firstName": "MA. THERESA",
+    "middleName": "DOMINGO",
+    "suffix": null,
+    "birthDate": "1976-08-19",
+    "sex": "Female",
+    "nationality": "Filipino",
+    "address": "56 ZAMORA ST., BRGY. 4, SAN FERNANDO CITY, LA UNION, 2500"
+   }
+  },
+  {
+   "name": "u1 passport clean",
+   "condition": "clean",
+   "idType": "passport",
+   "files": [
+    "u1_passport_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "SAN JUAN",
+    "firstName": "MA. THERESA",
+    "middleName": "DOMINGO",
+    "suffix": null,
+    "birthDate": "1976-08-19",
+    "sex": "Female",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "u1 philsys photo",
+   "condition": "photo",
+   "idType": "philsys",
+   "files": [
+    "u1_philsys_front_photo.jpg",
+    "u1_philsys_back_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "SAN JUAN",
+    "firstName": "MA. THERESA",
+    "middleName": "DOMINGO",
+    "suffix": null,
+    "birthDate": "1976-08-19",
+    "address": "56 ZAMORA ST., BRGY. 4, SAN FERNANDO CITY, LA UNION, 2500",
+    "sex": "Female",
+    "civilStatus": "Married"
+   }
+  },
+  {
+   "name": "u1 drivers_license photo",
+   "condition": "photo",
+   "idType": "drivers_license",
+   "files": [
+    "u1_drivers_license_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "SAN JUAN",
+    "firstName": "MA. THERESA",
+    "middleName": "DOMINGO",
+    "suffix": null,
+    "birthDate": "1976-08-19",
+    "sex": "Female",
+    "nationality": "Filipino",
+    "address": "56 ZAMORA ST., BRGY. 4, SAN FERNANDO CITY, LA UNION, 2500"
+   }
+  },
+  {
+   "name": "u1 passport photo",
+   "condition": "photo",
+   "idType": "passport",
+   "files": [
+    "u1_passport_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "SAN JUAN",
+    "firstName": "MA. THERESA",
+    "middleName": "DOMINGO",
+    "suffix": null,
+    "birthDate": "1976-08-19",
+    "sex": "Female",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "u2 philsys clean",
+   "condition": "clean",
+   "idType": "philsys",
+   "files": [
+    "u2_philsys_front_clean.jpg",
+    "u2_philsys_back_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "IBAÑEZ",
+    "firstName": "RAFAEL",
+    "middleName": "CORPUZ",
+    "suffix": null,
+    "birthDate": "1993-11-05",
+    "address": "PUROK 2, BRGY. CONSOLACION, AGOO, LA UNION, 2504",
+    "sex": "Male",
+    "civilStatus": "Single"
+   }
+  },
+  {
+   "name": "u2 drivers_license clean",
+   "condition": "clean",
+   "idType": "drivers_license",
+   "files": [
+    "u2_drivers_license_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "IBAÑEZ",
+    "firstName": "RAFAEL",
+    "middleName": "CORPUZ",
+    "suffix": null,
+    "birthDate": "1993-11-05",
+    "sex": "Male",
+    "nationality": "Filipino",
+    "address": "PUROK 2, BRGY. CONSOLACION, AGOO, LA UNION, 2504"
+   }
+  },
+  {
+   "name": "u2 passport clean",
+   "condition": "clean",
+   "idType": "passport",
+   "files": [
+    "u2_passport_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "IBAÑEZ",
+    "firstName": "RAFAEL",
+    "middleName": "CORPUZ",
+    "suffix": null,
+    "birthDate": "1993-11-05",
+    "sex": "Male",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "u2 philsys photo",
+   "condition": "photo",
+   "idType": "philsys",
+   "files": [
+    "u2_philsys_front_photo.jpg",
+    "u2_philsys_back_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "IBAÑEZ",
+    "firstName": "RAFAEL",
+    "middleName": "CORPUZ",
+    "suffix": null,
+    "birthDate": "1993-11-05",
+    "address": "PUROK 2, BRGY. CONSOLACION, AGOO, LA UNION, 2504",
+    "sex": "Male",
+    "civilStatus": "Single"
+   }
+  },
+  {
+   "name": "u2 drivers_license photo",
+   "condition": "photo",
+   "idType": "drivers_license",
+   "files": [
+    "u2_drivers_license_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "IBAÑEZ",
+    "firstName": "RAFAEL",
+    "middleName": "CORPUZ",
+    "suffix": null,
+    "birthDate": "1993-11-05",
+    "sex": "Male",
+    "nationality": "Filipino",
+    "address": "PUROK 2, BRGY. CONSOLACION, AGOO, LA UNION, 2504"
+   }
+  },
+  {
+   "name": "u2 passport photo",
+   "condition": "photo",
+   "idType": "passport",
+   "files": [
+    "u2_passport_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "IBAÑEZ",
+    "firstName": "RAFAEL",
+    "middleName": "CORPUZ",
+    "suffix": null,
+    "birthDate": "1993-11-05",
+    "sex": "Male",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "u3 philsys clean",
+   "condition": "clean",
+   "idType": "philsys",
+   "files": [
+    "u3_philsys_front_clean.jpg",
+    "u3_philsys_back_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "VALDEZ",
+    "firstName": "ERNESTO",
+    "middleName": "RAMOS",
+    "suffix": "Sr.",
+    "birthDate": "1961-01-27",
+    "address": "89 MACARTHUR HIGHWAY, BRGY. SAN MIGUEL, BAUANG, LA UNION, 2501",
+    "sex": "Male",
+    "civilStatus": "Widow/er"
+   }
+  },
+  {
+   "name": "u3 drivers_license clean",
+   "condition": "clean",
+   "idType": "drivers_license",
+   "files": [
+    "u3_drivers_license_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "VALDEZ",
+    "firstName": "ERNESTO",
+    "middleName": "RAMOS",
+    "suffix": "Sr.",
+    "birthDate": "1961-01-27",
+    "sex": "Male",
+    "nationality": "Filipino",
+    "address": "89 MACARTHUR HIGHWAY, BRGY. SAN MIGUEL, BAUANG, LA UNION, 2501"
+   }
+  },
+  {
+   "name": "u3 passport clean",
+   "condition": "clean",
+   "idType": "passport",
+   "files": [
+    "u3_passport_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "VALDEZ",
+    "firstName": "ERNESTO",
+    "middleName": "RAMOS",
+    "suffix": "Sr.",
+    "birthDate": "1961-01-27",
+    "sex": "Male",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "u3 philsys photo",
+   "condition": "photo",
+   "idType": "philsys",
+   "files": [
+    "u3_philsys_front_photo.jpg",
+    "u3_philsys_back_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "VALDEZ",
+    "firstName": "ERNESTO",
+    "middleName": "RAMOS",
+    "suffix": "Sr.",
+    "birthDate": "1961-01-27",
+    "address": "89 MACARTHUR HIGHWAY, BRGY. SAN MIGUEL, BAUANG, LA UNION, 2501",
+    "sex": "Male",
+    "civilStatus": "Widow/er"
+   }
+  },
+  {
+   "name": "u3 drivers_license photo",
+   "condition": "photo",
+   "idType": "drivers_license",
+   "files": [
+    "u3_drivers_license_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "VALDEZ",
+    "firstName": "ERNESTO",
+    "middleName": "RAMOS",
+    "suffix": "Sr.",
+    "birthDate": "1961-01-27",
+    "sex": "Male",
+    "nationality": "Filipino",
+    "address": "89 MACARTHUR HIGHWAY, BRGY. SAN MIGUEL, BAUANG, LA UNION, 2501"
+   }
+  },
+  {
+   "name": "u3 passport photo",
+   "condition": "photo",
+   "idType": "passport",
+   "files": [
+    "u3_passport_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "VALDEZ",
+    "firstName": "ERNESTO",
+    "middleName": "RAMOS",
+    "suffix": "Sr.",
+    "birthDate": "1961-01-27",
+    "sex": "Male",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "u4 philsys clean",
+   "condition": "clean",
+   "idType": "philsys",
+   "files": [
+    "u4_philsys_front_clean.jpg",
+    "u4_philsys_back_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "DEL ROSARIO",
+    "firstName": "JENNIFER",
+    "middleName": "ESTRADA",
+    "suffix": null,
+    "birthDate": "1990-09-30",
+    "address": "LOT 3 BLK 9, GREENHILLS SUBD., ROSARIO, LA UNION, 2506",
+    "sex": "Female",
+    "civilStatus": "Separated"
+   }
+  },
+  {
+   "name": "u4 drivers_license clean",
+   "condition": "clean",
+   "idType": "drivers_license",
+   "files": [
+    "u4_drivers_license_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "DEL ROSARIO",
+    "firstName": "JENNIFER",
+    "middleName": "ESTRADA",
+    "suffix": null,
+    "birthDate": "1990-09-30",
+    "sex": "Female",
+    "nationality": "Filipino",
+    "address": "LOT 3 BLK 9, GREENHILLS SUBD., ROSARIO, LA UNION, 2506"
+   }
+  },
+  {
+   "name": "u4 passport clean",
+   "condition": "clean",
+   "idType": "passport",
+   "files": [
+    "u4_passport_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "DEL ROSARIO",
+    "firstName": "JENNIFER",
+    "middleName": "ESTRADA",
+    "suffix": null,
+    "birthDate": "1990-09-30",
+    "sex": "Female",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "u4 philsys photo",
+   "condition": "photo",
+   "idType": "philsys",
+   "files": [
+    "u4_philsys_front_photo.jpg",
+    "u4_philsys_back_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "DEL ROSARIO",
+    "firstName": "JENNIFER",
+    "middleName": "ESTRADA",
+    "suffix": null,
+    "birthDate": "1990-09-30",
+    "address": "LOT 3 BLK 9, GREENHILLS SUBD., ROSARIO, LA UNION, 2506",
+    "sex": "Female",
+    "civilStatus": "Separated"
+   }
+  },
+  {
+   "name": "u4 drivers_license photo",
+   "condition": "photo",
+   "idType": "drivers_license",
+   "files": [
+    "u4_drivers_license_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "DEL ROSARIO",
+    "firstName": "JENNIFER",
+    "middleName": "ESTRADA",
+    "suffix": null,
+    "birthDate": "1990-09-30",
+    "sex": "Female",
+    "nationality": "Filipino",
+    "address": "LOT 3 BLK 9, GREENHILLS SUBD., ROSARIO, LA UNION, 2506"
+   }
+  },
+  {
+   "name": "u4 passport photo",
+   "condition": "photo",
+   "idType": "passport",
+   "files": [
+    "u4_passport_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "DEL ROSARIO",
+    "firstName": "JENNIFER",
+    "middleName": "ESTRADA",
+    "suffix": null,
+    "birthDate": "1990-09-30",
+    "sex": "Female",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "u5 philsys clean",
+   "condition": "clean",
+   "idType": "philsys",
+   "files": [
+    "u5_philsys_front_clean.jpg",
+    "u5_philsys_back_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "TOLENTINO",
+    "firstName": "ARVIN",
+    "middleName": "MACARAEG",
+    "suffix": null,
+    "birthDate": "2003-02-14",
+    "address": "SITIO TALOGTOG, BRGY. CAPAS, AGOO, LA UNION, 2504",
+    "sex": "Male",
+    "civilStatus": "Single"
+   }
+  },
+  {
+   "name": "u5 drivers_license clean",
+   "condition": "clean",
+   "idType": "drivers_license",
+   "files": [
+    "u5_drivers_license_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "TOLENTINO",
+    "firstName": "ARVIN",
+    "middleName": "MACARAEG",
+    "suffix": null,
+    "birthDate": "2003-02-14",
+    "sex": "Male",
+    "nationality": "Filipino",
+    "address": "SITIO TALOGTOG, BRGY. CAPAS, AGOO, LA UNION, 2504"
+   }
+  },
+  {
+   "name": "u5 passport clean",
+   "condition": "clean",
+   "idType": "passport",
+   "files": [
+    "u5_passport_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "TOLENTINO",
+    "firstName": "ARVIN",
+    "middleName": "MACARAEG",
+    "suffix": null,
+    "birthDate": "2003-02-14",
+    "sex": "Male",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "u5 philsys photo",
+   "condition": "photo",
+   "idType": "philsys",
+   "files": [
+    "u5_philsys_front_photo.jpg",
+    "u5_philsys_back_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "TOLENTINO",
+    "firstName": "ARVIN",
+    "middleName": "MACARAEG",
+    "suffix": null,
+    "birthDate": "2003-02-14",
+    "address": "SITIO TALOGTOG, BRGY. CAPAS, AGOO, LA UNION, 2504",
+    "sex": "Male",
+    "civilStatus": "Single"
+   }
+  },
+  {
+   "name": "u5 drivers_license photo",
+   "condition": "photo",
+   "idType": "drivers_license",
+   "files": [
+    "u5_drivers_license_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "TOLENTINO",
+    "firstName": "ARVIN",
+    "middleName": "MACARAEG",
+    "suffix": null,
+    "birthDate": "2003-02-14",
+    "sex": "Male",
+    "nationality": "Filipino",
+    "address": "SITIO TALOGTOG, BRGY. CAPAS, AGOO, LA UNION, 2504"
+   }
+  },
+  {
+   "name": "u5 passport photo",
+   "condition": "photo",
+   "idType": "passport",
+   "files": [
+    "u5_passport_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "TOLENTINO",
+    "firstName": "ARVIN",
+    "middleName": "MACARAEG",
+    "suffix": null,
+    "birthDate": "2003-02-14",
+    "sex": "Male",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "u6 philsys clean",
+   "condition": "clean",
+   "idType": "philsys",
+   "files": [
+    "u6_philsys_front_clean.jpg",
+    "u6_philsys_back_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "CABRERA",
+    "firstName": "GLORIA",
+    "middleName": "DELOS REYES",
+    "suffix": null,
+    "birthDate": "1955-12-08",
+    "address": "22 GOMEZ ST., BRGY. SAN NICOLAS NORTE, AGOO, LA UNION, 2504",
+    "sex": "Female",
+    "civilStatus": "Married"
+   }
+  },
+  {
+   "name": "u6 drivers_license clean",
+   "condition": "clean",
+   "idType": "drivers_license",
+   "files": [
+    "u6_drivers_license_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "CABRERA",
+    "firstName": "GLORIA",
+    "middleName": "DELOS REYES",
+    "suffix": null,
+    "birthDate": "1955-12-08",
+    "sex": "Female",
+    "nationality": "Filipino",
+    "address": "22 GOMEZ ST., BRGY. SAN NICOLAS NORTE, AGOO, LA UNION, 2504"
+   }
+  },
+  {
+   "name": "u6 passport clean",
+   "condition": "clean",
+   "idType": "passport",
+   "files": [
+    "u6_passport_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "CABRERA",
+    "firstName": "GLORIA",
+    "middleName": "DELOS REYES",
+    "suffix": null,
+    "birthDate": "1955-12-08",
+    "sex": "Female",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "u6 philsys photo",
+   "condition": "photo",
+   "idType": "philsys",
+   "files": [
+    "u6_philsys_front_photo.jpg",
+    "u6_philsys_back_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "CABRERA",
+    "firstName": "GLORIA",
+    "middleName": "DELOS REYES",
+    "suffix": null,
+    "birthDate": "1955-12-08",
+    "address": "22 GOMEZ ST., BRGY. SAN NICOLAS NORTE, AGOO, LA UNION, 2504",
+    "sex": "Female",
+    "civilStatus": "Married"
+   }
+  },
+  {
+   "name": "u6 drivers_license photo",
+   "condition": "photo",
+   "idType": "drivers_license",
+   "files": [
+    "u6_drivers_license_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "CABRERA",
+    "firstName": "GLORIA",
+    "middleName": "DELOS REYES",
+    "suffix": null,
+    "birthDate": "1955-12-08",
+    "sex": "Female",
+    "nationality": "Filipino",
+    "address": "22 GOMEZ ST., BRGY. SAN NICOLAS NORTE, AGOO, LA UNION, 2504"
+   }
+  },
+  {
+   "name": "u6 passport photo",
+   "condition": "photo",
+   "idType": "passport",
+   "files": [
+    "u6_passport_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "CABRERA",
+    "firstName": "GLORIA",
+    "middleName": "DELOS REYES",
+    "suffix": null,
+    "birthDate": "1955-12-08",
+    "sex": "Female",
+    "nationality": "Filipino"
+   }
+  }
+ ]
+}

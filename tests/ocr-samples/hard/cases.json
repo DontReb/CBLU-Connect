@@ -1,0 +1,653 @@
+{
+ "note": "Fictional people on specimen cards made by make_ids.py. Not real IDs.",
+ "cases": [
+  {
+   "name": "h1 philsys clean",
+   "condition": "clean",
+   "idType": "philsys",
+   "files": [
+    "h1_philsys_front_clean.jpg",
+    "h1_philsys_back_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "PEÑA",
+    "firstName": "JOSE MIGUEL",
+    "middleName": "CASTAÑEDA",
+    "suffix": null,
+    "birthDate": "1969-12-31",
+    "address": "78 QUEZON AVE., BRGY. CATBANGEN, SAN FERNANDO CITY, LA UNION, 2500",
+    "sex": "Male",
+    "civilStatus": "Married"
+   }
+  },
+  {
+   "name": "h1 drivers_license clean",
+   "condition": "clean",
+   "idType": "drivers_license",
+   "files": [
+    "h1_drivers_license_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "PEÑA",
+    "firstName": "JOSE MIGUEL",
+    "middleName": "CASTAÑEDA",
+    "suffix": null,
+    "birthDate": "1969-12-31",
+    "sex": "Male",
+    "nationality": "Filipino",
+    "address": "78 QUEZON AVE., BRGY. CATBANGEN, SAN FERNANDO CITY, LA UNION, 2500"
+   }
+  },
+  {
+   "name": "h1 passport clean",
+   "condition": "clean",
+   "idType": "passport",
+   "files": [
+    "h1_passport_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "PEÑA",
+    "firstName": "JOSE MIGUEL",
+    "middleName": "CASTAÑEDA",
+    "suffix": null,
+    "birthDate": "1969-12-31",
+    "sex": "Male",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "h1 philsys photo",
+   "condition": "photo",
+   "idType": "philsys",
+   "files": [
+    "h1_philsys_front_photo.jpg",
+    "h1_philsys_back_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "PEÑA",
+    "firstName": "JOSE MIGUEL",
+    "middleName": "CASTAÑEDA",
+    "suffix": null,
+    "birthDate": "1969-12-31",
+    "address": "78 QUEZON AVE., BRGY. CATBANGEN, SAN FERNANDO CITY, LA UNION, 2500",
+    "sex": "Male",
+    "civilStatus": "Married"
+   }
+  },
+  {
+   "name": "h1 drivers_license photo",
+   "condition": "photo",
+   "idType": "drivers_license",
+   "files": [
+    "h1_drivers_license_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "PEÑA",
+    "firstName": "JOSE MIGUEL",
+    "middleName": "CASTAÑEDA",
+    "suffix": null,
+    "birthDate": "1969-12-31",
+    "sex": "Male",
+    "nationality": "Filipino",
+    "address": "78 QUEZON AVE., BRGY. CATBANGEN, SAN FERNANDO CITY, LA UNION, 2500"
+   }
+  },
+  {
+   "name": "h1 passport photo",
+   "condition": "photo",
+   "idType": "passport",
+   "files": [
+    "h1_passport_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "PEÑA",
+    "firstName": "JOSE MIGUEL",
+    "middleName": "CASTAÑEDA",
+    "suffix": null,
+    "birthDate": "1969-12-31",
+    "sex": "Male",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "h2 philsys clean",
+   "condition": "clean",
+   "idType": "philsys",
+   "files": [
+    "h2_philsys_front_clean.jpg",
+    "h2_philsys_back_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "DE LOS SANTOS",
+    "firstName": "KRISTINE JOY",
+    "middleName": "MANGAOANG",
+    "suffix": null,
+    "birthDate": "1995-07-04",
+    "address": "SITIO PAGDALAGAN, BRGY. SAN ANTONIO, BAUANG, LA UNION, 2501",
+    "sex": "Female",
+    "civilStatus": "Single"
+   }
+  },
+  {
+   "name": "h2 drivers_license clean",
+   "condition": "clean",
+   "idType": "drivers_license",
+   "files": [
+    "h2_drivers_license_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "DE LOS SANTOS",
+    "firstName": "KRISTINE JOY",
+    "middleName": "MANGAOANG",
+    "suffix": null,
+    "birthDate": "1995-07-04",
+    "sex": "Female",
+    "nationality": "Filipino",
+    "address": "SITIO PAGDALAGAN, BRGY. SAN ANTONIO, BAUANG, LA UNION, 2501"
+   }
+  },
+  {
+   "name": "h2 passport clean",
+   "condition": "clean",
+   "idType": "passport",
+   "files": [
+    "h2_passport_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "DE LOS SANTOS",
+    "firstName": "KRISTINE JOY",
+    "middleName": "MANGAOANG",
+    "suffix": null,
+    "birthDate": "1995-07-04",
+    "sex": "Female",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "h2 philsys photo",
+   "condition": "photo",
+   "idType": "philsys",
+   "files": [
+    "h2_philsys_front_photo.jpg",
+    "h2_philsys_back_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "DE LOS SANTOS",
+    "firstName": "KRISTINE JOY",
+    "middleName": "MANGAOANG",
+    "suffix": null,
+    "birthDate": "1995-07-04",
+    "address": "SITIO PAGDALAGAN, BRGY. SAN ANTONIO, BAUANG, LA UNION, 2501",
+    "sex": "Female",
+    "civilStatus": "Single"
+   }
+  },
+  {
+   "name": "h2 drivers_license photo",
+   "condition": "photo",
+   "idType": "drivers_license",
+   "files": [
+    "h2_drivers_license_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "DE LOS SANTOS",
+    "firstName": "KRISTINE JOY",
+    "middleName": "MANGAOANG",
+    "suffix": null,
+    "birthDate": "1995-07-04",
+    "sex": "Female",
+    "nationality": "Filipino",
+    "address": "SITIO PAGDALAGAN, BRGY. SAN ANTONIO, BAUANG, LA UNION, 2501"
+   }
+  },
+  {
+   "name": "h2 passport photo",
+   "condition": "photo",
+   "idType": "passport",
+   "files": [
+    "h2_passport_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "DE LOS SANTOS",
+    "firstName": "KRISTINE JOY",
+    "middleName": "MANGAOANG",
+    "suffix": null,
+    "birthDate": "1995-07-04",
+    "sex": "Female",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "h3 philsys clean",
+   "condition": "clean",
+   "idType": "philsys",
+   "files": [
+    "h3_philsys_front_clean.jpg",
+    "h3_philsys_back_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "OCAMPO",
+    "firstName": "RICARDO",
+    "middleName": "TAN",
+    "suffix": "III",
+    "birthDate": "1982-02-28",
+    "address": "12 BONIFACIO ST., BRGY. SAN JOSE NORTE, AGOO, LA UNION, 2504",
+    "sex": "Male",
+    "civilStatus": "Separated"
+   }
+  },
+  {
+   "name": "h3 drivers_license clean",
+   "condition": "clean",
+   "idType": "drivers_license",
+   "files": [
+    "h3_drivers_license_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "OCAMPO",
+    "firstName": "RICARDO",
+    "middleName": "TAN",
+    "suffix": "III",
+    "birthDate": "1982-02-28",
+    "sex": "Male",
+    "nationality": "Filipino",
+    "address": "12 BONIFACIO ST., BRGY. SAN JOSE NORTE, AGOO, LA UNION, 2504"
+   }
+  },
+  {
+   "name": "h3 passport clean",
+   "condition": "clean",
+   "idType": "passport",
+   "files": [
+    "h3_passport_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "OCAMPO",
+    "firstName": "RICARDO",
+    "middleName": "TAN",
+    "suffix": "III",
+    "birthDate": "1982-02-28",
+    "sex": "Male",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "h3 philsys photo",
+   "condition": "photo",
+   "idType": "philsys",
+   "files": [
+    "h3_philsys_front_photo.jpg",
+    "h3_philsys_back_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "OCAMPO",
+    "firstName": "RICARDO",
+    "middleName": "TAN",
+    "suffix": "III",
+    "birthDate": "1982-02-28",
+    "address": "12 BONIFACIO ST., BRGY. SAN JOSE NORTE, AGOO, LA UNION, 2504",
+    "sex": "Male",
+    "civilStatus": "Separated"
+   }
+  },
+  {
+   "name": "h3 drivers_license photo",
+   "condition": "photo",
+   "idType": "drivers_license",
+   "files": [
+    "h3_drivers_license_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "OCAMPO",
+    "firstName": "RICARDO",
+    "middleName": "TAN",
+    "suffix": "III",
+    "birthDate": "1982-02-28",
+    "sex": "Male",
+    "nationality": "Filipino",
+    "address": "12 BONIFACIO ST., BRGY. SAN JOSE NORTE, AGOO, LA UNION, 2504"
+   }
+  },
+  {
+   "name": "h3 passport photo",
+   "condition": "photo",
+   "idType": "passport",
+   "files": [
+    "h3_passport_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "OCAMPO",
+    "firstName": "RICARDO",
+    "middleName": "TAN",
+    "suffix": "III",
+    "birthDate": "1982-02-28",
+    "sex": "Male",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "h4 philsys clean",
+   "condition": "clean",
+   "idType": "philsys",
+   "files": [
+    "h4_philsys_front_clean.jpg",
+    "h4_philsys_back_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "GALANG",
+    "firstName": "LOURDES",
+    "middleName": "ABAD",
+    "suffix": null,
+    "birthDate": "1958-10-10",
+    "address": "PUROK 6, BRGY. NAZARETH, ARINGAY, LA UNION, 2503",
+    "sex": "Female",
+    "civilStatus": "Widow/er"
+   }
+  },
+  {
+   "name": "h4 drivers_license clean",
+   "condition": "clean",
+   "idType": "drivers_license",
+   "files": [
+    "h4_drivers_license_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "GALANG",
+    "firstName": "LOURDES",
+    "middleName": "ABAD",
+    "suffix": null,
+    "birthDate": "1958-10-10",
+    "sex": "Female",
+    "nationality": "Filipino",
+    "address": "PUROK 6, BRGY. NAZARETH, ARINGAY, LA UNION, 2503"
+   }
+  },
+  {
+   "name": "h4 passport clean",
+   "condition": "clean",
+   "idType": "passport",
+   "files": [
+    "h4_passport_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "GALANG",
+    "firstName": "LOURDES",
+    "middleName": "ABAD",
+    "suffix": null,
+    "birthDate": "1958-10-10",
+    "sex": "Female",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "h4 philsys photo",
+   "condition": "photo",
+   "idType": "philsys",
+   "files": [
+    "h4_philsys_front_photo.jpg",
+    "h4_philsys_back_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "GALANG",
+    "firstName": "LOURDES",
+    "middleName": "ABAD",
+    "suffix": null,
+    "birthDate": "1958-10-10",
+    "address": "PUROK 6, BRGY. NAZARETH, ARINGAY, LA UNION, 2503",
+    "sex": "Female",
+    "civilStatus": "Widow/er"
+   }
+  },
+  {
+   "name": "h4 drivers_license photo",
+   "condition": "photo",
+   "idType": "drivers_license",
+   "files": [
+    "h4_drivers_license_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "GALANG",
+    "firstName": "LOURDES",
+    "middleName": "ABAD",
+    "suffix": null,
+    "birthDate": "1958-10-10",
+    "sex": "Female",
+    "nationality": "Filipino",
+    "address": "PUROK 6, BRGY. NAZARETH, ARINGAY, LA UNION, 2503"
+   }
+  },
+  {
+   "name": "h4 passport photo",
+   "condition": "photo",
+   "idType": "passport",
+   "files": [
+    "h4_passport_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "GALANG",
+    "firstName": "LOURDES",
+    "middleName": "ABAD",
+    "suffix": null,
+    "birthDate": "1958-10-10",
+    "sex": "Female",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "h5 philsys clean",
+   "condition": "clean",
+   "idType": "philsys",
+   "files": [
+    "h5_philsys_front_clean.jpg",
+    "h5_philsys_back_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "SALAZAR",
+    "firstName": "MARK ANTHONY",
+    "middleName": "DELA ROSA",
+    "suffix": null,
+    "birthDate": "1999-05-17",
+    "address": "BLK 2 LOT 7 PHASE 1, VILLA GRACIA SUBD., STO. TOMAS, LA UNION, 2505",
+    "sex": "Male",
+    "civilStatus": "Single"
+   }
+  },
+  {
+   "name": "h5 drivers_license clean",
+   "condition": "clean",
+   "idType": "drivers_license",
+   "files": [
+    "h5_drivers_license_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "SALAZAR",
+    "firstName": "MARK ANTHONY",
+    "middleName": "DELA ROSA",
+    "suffix": null,
+    "birthDate": "1999-05-17",
+    "sex": "Male",
+    "nationality": "Filipino",
+    "address": "BLK 2 LOT 7 PHASE 1, VILLA GRACIA SUBD., STO. TOMAS, LA UNION, 2505"
+   }
+  },
+  {
+   "name": "h5 passport clean",
+   "condition": "clean",
+   "idType": "passport",
+   "files": [
+    "h5_passport_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "SALAZAR",
+    "firstName": "MARK ANTHONY",
+    "middleName": "DELA ROSA",
+    "suffix": null,
+    "birthDate": "1999-05-17",
+    "sex": "Male",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "h5 philsys photo",
+   "condition": "photo",
+   "idType": "philsys",
+   "files": [
+    "h5_philsys_front_photo.jpg",
+    "h5_philsys_back_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "SALAZAR",
+    "firstName": "MARK ANTHONY",
+    "middleName": "DELA ROSA",
+    "suffix": null,
+    "birthDate": "1999-05-17",
+    "address": "BLK 2 LOT 7 PHASE 1, VILLA GRACIA SUBD., STO. TOMAS, LA UNION, 2505",
+    "sex": "Male",
+    "civilStatus": "Single"
+   }
+  },
+  {
+   "name": "h5 drivers_license photo",
+   "condition": "photo",
+   "idType": "drivers_license",
+   "files": [
+    "h5_drivers_license_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "SALAZAR",
+    "firstName": "MARK ANTHONY",
+    "middleName": "DELA ROSA",
+    "suffix": null,
+    "birthDate": "1999-05-17",
+    "sex": "Male",
+    "nationality": "Filipino",
+    "address": "BLK 2 LOT 7 PHASE 1, VILLA GRACIA SUBD., STO. TOMAS, LA UNION, 2505"
+   }
+  },
+  {
+   "name": "h5 passport photo",
+   "condition": "photo",
+   "idType": "passport",
+   "files": [
+    "h5_passport_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "SALAZAR",
+    "firstName": "MARK ANTHONY",
+    "middleName": "DELA ROSA",
+    "suffix": null,
+    "birthDate": "1999-05-17",
+    "sex": "Male",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "h6 philsys clean",
+   "condition": "clean",
+   "idType": "philsys",
+   "files": [
+    "h6_philsys_front_clean.jpg",
+    "h6_philsys_back_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "AQUINO",
+    "firstName": "CARMELA",
+    "middleName": "VILLANUEVA",
+    "suffix": null,
+    "birthDate": "1988-04-02",
+    "address": "234 NATIONAL HIGHWAY, BRGY. SAN NICOLAS SUR, AGOO, LA UNION, 2504",
+    "sex": "Female",
+    "civilStatus": "Married"
+   }
+  },
+  {
+   "name": "h6 drivers_license clean",
+   "condition": "clean",
+   "idType": "drivers_license",
+   "files": [
+    "h6_drivers_license_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "AQUINO",
+    "firstName": "CARMELA",
+    "middleName": "VILLANUEVA",
+    "suffix": null,
+    "birthDate": "1988-04-02",
+    "sex": "Female",
+    "nationality": "Filipino",
+    "address": "234 NATIONAL HIGHWAY, BRGY. SAN NICOLAS SUR, AGOO, LA UNION, 2504"
+   }
+  },
+  {
+   "name": "h6 passport clean",
+   "condition": "clean",
+   "idType": "passport",
+   "files": [
+    "h6_passport_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "AQUINO",
+    "firstName": "CARMELA",
+    "middleName": "VILLANUEVA",
+    "suffix": null,
+    "birthDate": "1988-04-02",
+    "sex": "Female",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "h6 philsys photo",
+   "condition": "photo",
+   "idType": "philsys",
+   "files": [
+    "h6_philsys_front_photo.jpg",
+    "h6_philsys_back_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "AQUINO",
+    "firstName": "CARMELA",
+    "middleName": "VILLANUEVA",
+    "suffix": null,
+    "birthDate": "1988-04-02",
+    "address": "234 NATIONAL HIGHWAY, BRGY. SAN NICOLAS SUR, AGOO, LA UNION, 2504",
+    "sex": "Female",
+    "civilStatus": "Married"
+   }
+  },
+  {
+   "name": "h6 drivers_license photo",
+   "condition": "photo",
+   "idType": "drivers_license",
+   "files": [
+    "h6_drivers_license_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "AQUINO",
+    "firstName": "CARMELA",
+    "middleName": "VILLANUEVA",
+    "suffix": null,
+    "birthDate": "1988-04-02",
+    "sex": "Female",
+    "nationality": "Filipino",
+    "address": "234 NATIONAL HIGHWAY, BRGY. SAN NICOLAS SUR, AGOO, LA UNION, 2504"
+   }
+  },
+  {
+   "name": "h6 passport photo",
+   "condition": "photo",
+   "idType": "passport",
+   "files": [
+    "h6_passport_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "AQUINO",
+    "firstName": "CARMELA",
+    "middleName": "VILLANUEVA",
+    "suffix": null,
+    "birthDate": "1988-04-02",
+    "sex": "Female",
+    "nationality": "Filipino"
+   }
+  }
+ ]
+}

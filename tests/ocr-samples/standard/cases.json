@@ -1,0 +1,437 @@
+{
+ "note": "Fictional people on specimen cards made by make_ids.py. Not real IDs.",
+ "cases": [
+  {
+   "name": "p1 philsys clean",
+   "condition": "clean",
+   "idType": "philsys",
+   "files": [
+    "p1_philsys_front_clean.jpg",
+    "p1_philsys_back_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "DELA CRUZ",
+    "firstName": "JUAN",
+    "middleName": "SANTOS",
+    "suffix": null,
+    "birthDate": "1990-01-01",
+    "address": "123 RIZAL STREET, BRGY. SAN JOSE, AGOO, LA UNION, 2504",
+    "sex": "Male",
+    "civilStatus": "Single"
+   }
+  },
+  {
+   "name": "p1 drivers_license clean",
+   "condition": "clean",
+   "idType": "drivers_license",
+   "files": [
+    "p1_drivers_license_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "DELA CRUZ",
+    "firstName": "JUAN",
+    "middleName": "SANTOS",
+    "suffix": null,
+    "birthDate": "1990-01-01",
+    "sex": "Male",
+    "nationality": "Filipino",
+    "address": "123 RIZAL STREET, BRGY. SAN JOSE, AGOO, LA UNION, 2504"
+   }
+  },
+  {
+   "name": "p1 passport clean",
+   "condition": "clean",
+   "idType": "passport",
+   "files": [
+    "p1_passport_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "DELA CRUZ",
+    "firstName": "JUAN",
+    "middleName": "SANTOS",
+    "suffix": null,
+    "birthDate": "1990-01-01",
+    "sex": "Male",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "p1 philsys photo",
+   "condition": "photo",
+   "idType": "philsys",
+   "files": [
+    "p1_philsys_front_photo.jpg",
+    "p1_philsys_back_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "DELA CRUZ",
+    "firstName": "JUAN",
+    "middleName": "SANTOS",
+    "suffix": null,
+    "birthDate": "1990-01-01",
+    "address": "123 RIZAL STREET, BRGY. SAN JOSE, AGOO, LA UNION, 2504",
+    "sex": "Male",
+    "civilStatus": "Single"
+   }
+  },
+  {
+   "name": "p1 drivers_license photo",
+   "condition": "photo",
+   "idType": "drivers_license",
+   "files": [
+    "p1_drivers_license_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "DELA CRUZ",
+    "firstName": "JUAN",
+    "middleName": "SANTOS",
+    "suffix": null,
+    "birthDate": "1990-01-01",
+    "sex": "Male",
+    "nationality": "Filipino",
+    "address": "123 RIZAL STREET, BRGY. SAN JOSE, AGOO, LA UNION, 2504"
+   }
+  },
+  {
+   "name": "p1 passport photo",
+   "condition": "photo",
+   "idType": "passport",
+   "files": [
+    "p1_passport_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "DELA CRUZ",
+    "firstName": "JUAN",
+    "middleName": "SANTOS",
+    "suffix": null,
+    "birthDate": "1990-01-01",
+    "sex": "Male",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "p2 philsys clean",
+   "condition": "clean",
+   "idType": "philsys",
+   "files": [
+    "p2_philsys_front_clean.jpg",
+    "p2_philsys_back_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "REYES",
+    "firstName": "MARIA CLARA",
+    "middleName": "GARCIA",
+    "suffix": null,
+    "birthDate": "1985-11-23",
+    "address": "45 MABINI ST., POBLACION, SAN FERNANDO CITY, LA UNION, 2500",
+    "sex": "Female",
+    "civilStatus": "Married"
+   }
+  },
+  {
+   "name": "p2 drivers_license clean",
+   "condition": "clean",
+   "idType": "drivers_license",
+   "files": [
+    "p2_drivers_license_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "REYES",
+    "firstName": "MARIA CLARA",
+    "middleName": "GARCIA",
+    "suffix": null,
+    "birthDate": "1985-11-23",
+    "sex": "Female",
+    "nationality": "Filipino",
+    "address": "45 MABINI ST., POBLACION, SAN FERNANDO CITY, LA UNION, 2500"
+   }
+  },
+  {
+   "name": "p2 passport clean",
+   "condition": "clean",
+   "idType": "passport",
+   "files": [
+    "p2_passport_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "REYES",
+    "firstName": "MARIA CLARA",
+    "middleName": "GARCIA",
+    "suffix": null,
+    "birthDate": "1985-11-23",
+    "sex": "Female",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "p2 philsys photo",
+   "condition": "photo",
+   "idType": "philsys",
+   "files": [
+    "p2_philsys_front_photo.jpg",
+    "p2_philsys_back_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "REYES",
+    "firstName": "MARIA CLARA",
+    "middleName": "GARCIA",
+    "suffix": null,
+    "birthDate": "1985-11-23",
+    "address": "45 MABINI ST., POBLACION, SAN FERNANDO CITY, LA UNION, 2500",
+    "sex": "Female",
+    "civilStatus": "Married"
+   }
+  },
+  {
+   "name": "p2 drivers_license photo",
+   "condition": "photo",
+   "idType": "drivers_license",
+   "files": [
+    "p2_drivers_license_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "REYES",
+    "firstName": "MARIA CLARA",
+    "middleName": "GARCIA",
+    "suffix": null,
+    "birthDate": "1985-11-23",
+    "sex": "Female",
+    "nationality": "Filipino",
+    "address": "45 MABINI ST., POBLACION, SAN FERNANDO CITY, LA UNION, 2500"
+   }
+  },
+  {
+   "name": "p2 passport photo",
+   "condition": "photo",
+   "idType": "passport",
+   "files": [
+    "p2_passport_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "REYES",
+    "firstName": "MARIA CLARA",
+    "middleName": "GARCIA",
+    "suffix": null,
+    "birthDate": "1985-11-23",
+    "sex": "Female",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "p3 philsys clean",
+   "condition": "clean",
+   "idType": "philsys",
+   "files": [
+    "p3_philsys_front_clean.jpg",
+    "p3_philsys_back_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "BAUTISTA",
+    "firstName": "ROBERTO",
+    "middleName": "DE LEON",
+    "suffix": "Jr.",
+    "birthDate": "1978-06-15",
+    "address": "PUROK 3, BRGY. SAN NICOLAS NORTE, AGOO, LA UNION, 2504",
+    "sex": "Male",
+    "civilStatus": "Widow/er"
+   }
+  },
+  {
+   "name": "p3 drivers_license clean",
+   "condition": "clean",
+   "idType": "drivers_license",
+   "files": [
+    "p3_drivers_license_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "BAUTISTA",
+    "firstName": "ROBERTO",
+    "middleName": "DE LEON",
+    "suffix": "Jr.",
+    "birthDate": "1978-06-15",
+    "sex": "Male",
+    "nationality": "Filipino",
+    "address": "PUROK 3, BRGY. SAN NICOLAS NORTE, AGOO, LA UNION, 2504"
+   }
+  },
+  {
+   "name": "p3 passport clean",
+   "condition": "clean",
+   "idType": "passport",
+   "files": [
+    "p3_passport_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "BAUTISTA",
+    "firstName": "ROBERTO",
+    "middleName": "DE LEON",
+    "suffix": "Jr.",
+    "birthDate": "1978-06-15",
+    "sex": "Male",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "p3 philsys photo",
+   "condition": "photo",
+   "idType": "philsys",
+   "files": [
+    "p3_philsys_front_photo.jpg",
+    "p3_philsys_back_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "BAUTISTA",
+    "firstName": "ROBERTO",
+    "middleName": "DE LEON",
+    "suffix": "Jr.",
+    "birthDate": "1978-06-15",
+    "address": "PUROK 3, BRGY. SAN NICOLAS NORTE, AGOO, LA UNION, 2504",
+    "sex": "Male",
+    "civilStatus": "Widow/er"
+   }
+  },
+  {
+   "name": "p3 drivers_license photo",
+   "condition": "photo",
+   "idType": "drivers_license",
+   "files": [
+    "p3_drivers_license_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "BAUTISTA",
+    "firstName": "ROBERTO",
+    "middleName": "DE LEON",
+    "suffix": "Jr.",
+    "birthDate": "1978-06-15",
+    "sex": "Male",
+    "nationality": "Filipino",
+    "address": "PUROK 3, BRGY. SAN NICOLAS NORTE, AGOO, LA UNION, 2504"
+   }
+  },
+  {
+   "name": "p3 passport photo",
+   "condition": "photo",
+   "idType": "passport",
+   "files": [
+    "p3_passport_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "BAUTISTA",
+    "firstName": "ROBERTO",
+    "middleName": "DE LEON",
+    "suffix": "Jr.",
+    "birthDate": "1978-06-15",
+    "sex": "Male",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "p4 philsys clean",
+   "condition": "clean",
+   "idType": "philsys",
+   "files": [
+    "p4_philsys_front_clean.jpg",
+    "p4_philsys_back_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "VILLANUEVA",
+    "firstName": "ANA",
+    "middleName": "LOPEZ",
+    "suffix": null,
+    "birthDate": "2001-03-09",
+    "address": "BLK 4 LOT 12, SUNRISE VILLAGE, BAUANG, LA UNION, 2501",
+    "sex": "Female",
+    "civilStatus": "Single"
+   }
+  },
+  {
+   "name": "p4 drivers_license clean",
+   "condition": "clean",
+   "idType": "drivers_license",
+   "files": [
+    "p4_drivers_license_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "VILLANUEVA",
+    "firstName": "ANA",
+    "middleName": "LOPEZ",
+    "suffix": null,
+    "birthDate": "2001-03-09",
+    "sex": "Female",
+    "nationality": "Filipino",
+    "address": "BLK 4 LOT 12, SUNRISE VILLAGE, BAUANG, LA UNION, 2501"
+   }
+  },
+  {
+   "name": "p4 passport clean",
+   "condition": "clean",
+   "idType": "passport",
+   "files": [
+    "p4_passport_clean.jpg"
+   ],
+   "expected": {
+    "lastName": "VILLANUEVA",
+    "firstName": "ANA",
+    "middleName": "LOPEZ",
+    "suffix": null,
+    "birthDate": "2001-03-09",
+    "sex": "Female",
+    "nationality": "Filipino"
+   }
+  },
+  {
+   "name": "p4 philsys photo",
+   "condition": "photo",
+   "idType": "philsys",
+   "files": [
+    "p4_philsys_front_photo.jpg",
+    "p4_philsys_back_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "VILLANUEVA",
+    "firstName": "ANA",
+    "middleName": "LOPEZ",
+    "suffix": null,
+    "birthDate": "2001-03-09",
+    "address": "BLK 4 LOT 12, SUNRISE VILLAGE, BAUANG, LA UNION, 2501",
+    "sex": "Female",
+    "civilStatus": "Single"
+   }
+  },
+  {
+   "name": "p4 drivers_license photo",
+   "condition": "photo",
+   "idType": "drivers_license",
+   "files": [
+    "p4_drivers_license_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "VILLANUEVA",
+    "firstName": "ANA",
+    "middleName": "LOPEZ",
+    "suffix": null,
+    "birthDate": "2001-03-09",
+    "sex": "Female",
+    "nationality": "Filipino",
+    "address": "BLK 4 LOT 12, SUNRISE VILLAGE, BAUANG, LA UNION, 2501"
+   }
+  },
+  {
+   "name": "p4 passport photo",
+   "condition": "photo",
+   "idType": "passport",
+   "files": [
+    "p4_passport_photo.jpg"
+   ],
+   "expected": {
+    "lastName": "VILLANUEVA",
+    "firstName": "ANA",
+    "middleName": "LOPEZ",
+    "suffix": null,
+    "birthDate": "2001-03-09",
+    "sex": "Female",
+    "nationality": "Filipino"
+   }
+  }
+ ]
+}
