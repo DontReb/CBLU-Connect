@@ -31,4 +31,11 @@ export default defineConfig([
       globals: globals.node,
     },
   },
+
+  // Face check code shared by the browser and the server — plain JavaScript,
+  // no browser or Node features.
+  {
+    files: ['shared/**/*.js'],
+    extends: [js.configs.recommended],
+  },
 ])

@@ -21,6 +21,8 @@ export default function AdminOverview() {
   const started = clients.filter((client) => client.application).length;
   const complete = clients.filter((client) => applicationStage(client.application).key === 'complete').length;
   const docsReady = clients.filter((client) => documentsReady(client.checklist)).length;
+  const verified = clients.filter((client) => client.identity?.verifiedAt).length;
+  const locked = clients.filter((client) => client.identity?.locked).length;
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -35,8 +37,14 @@ export default function AdminOverview() {
         </p>
       )}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <StatCard label="Clients" value={ready ? clients.length : '—'} to="/dashboard/admin/clients" />
+        <StatCard
+          label="Identity verified"
+          value={ready ? verified : '—'}
+          note={ready && locked ? `${locked} locked today — verify at branch` : 'Passed the face check'}
+          to="/dashboard/admin/clients"
+        />
         <StatCard
           label="Applications started"
           value={ready ? started : '—'}
@@ -68,6 +76,17 @@ export default function AdminOverview() {
             : '—'}
         </p>
         <p className="mt-1 text-xs text-ink-soft">What clients see, tick and print with their application.</p>
+      </Link>
+
+      <Link
+        to="/dashboard/admin/face-test"
+        className="block rounded-2xl border border-line bg-panel p-5 shadow-sm transition-colors hover:border-accent/40"
+      >
+        <p className="text-sm text-ink-soft">Face check testing</p>
+        <p className="mt-1 font-medium text-ink">Record test sessions with volunteers</p>
+        <p className="mt-1 text-xs text-ink-soft">
+          For measuring face verification and liveness accuracy. Recordings download to this computer only.
+        </p>
       </Link>
     </div>
   );

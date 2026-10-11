@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { to: '/dashboard/admin/clients', label: 'Clients', icon: 'user' },
   { to: '/dashboard/admin/announcements', label: 'Announcements', icon: 'announcement' },
   { to: '/dashboard/admin/requirements', label: 'Requirements', icon: 'document' },
+  { to: '/dashboard/admin/face-test', label: 'Face check tests', icon: 'face' },
 ];
 
 export default function AdminDashboardLayout() {

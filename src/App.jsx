@@ -20,6 +20,7 @@ import AdminOverview from './pages/admin/AdminOverview';
 import AdminClients from './pages/admin/AdminClients';
 import AdminAnnouncements from './pages/admin/AdminAnnouncements';
 import AdminRequirements from './pages/admin/AdminRequirements';
+import AdminFaceTest from './pages/admin/AdminFaceTest';
 import AgentDashboardLayout from './pages/agent/AgentDashboardLayout';
 import AgentQueue from './pages/agent/AgentQueue';
 import AgentClosedSessions from './pages/agent/AgentClosedSessions';
@@ -84,6 +85,7 @@ function AnimatedRoutes() {
             <Route path="clients" element={<AdminClients />} />
             <Route path="announcements" element={<AdminAnnouncements />} />
             <Route path="requirements" element={<AdminRequirements />} />
+            <Route path="face-test" element={<AdminFaceTest />} />
             <Route path="checklists" element={<Navigate to="/dashboard/admin/requirements" replace />} />
           </Route>
         </Route>

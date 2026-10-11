@@ -63,6 +63,8 @@ CREATE TABLE form_submissions (
     last_id_type          VARCHAR(30),           -- e.g. 'philsys', 'drivers_license', 'passport'
     last_scan_at          TIMESTAMPTZ,
     last_ocr_confidence   NUMERIC(5,2),
+    identity_verified_at  TIMESTAMPTZ,           -- when the scanned ID's values were accepted after a face check
+    identity_match_score  REAL,                  -- ID photo vs live face similarity at that check
     created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
     UNIQUE (client_id, template_id)
@@ -86,6 +88,36 @@ CREATE TABLE form_submission_values (
 );
 
 CREATE INDEX idx_form_submission_values_submission ON form_submission_values(submission_id);
+
+-- ----------------------------------------------------------------------------
+-- IDENTITY CHECKS — one row per finished live face check (face verification
+-- + liveness detection). Only the result and scores are kept: never the
+-- pictures, the ID photo or face data. Three failed checks in one day
+-- (Philippine time) lock scanning until the next day.
+-- ----------------------------------------------------------------------------
+
+CREATE TABLE identity_checks (
+    id                  BIGSERIAL PRIMARY KEY,
+    client_id           UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    challenge_id        UUID NOT NULL UNIQUE,     -- each challenge can be used once
+    id_type             VARCHAR(30),
+    passed              BOOLEAN NOT NULL,         -- face_verified AND live
+    face_verified       BOOLEAN NOT NULL,         -- live face matches the ID photo
+    live                BOOLEAN NOT NULL,         -- liveness detection passed
+    failure_reason      VARCHAR(30),
+    match_score         REAL,                     -- SFace cosine similarity, ID vs live face
+    real_face_score     REAL,                     -- MiniFASNet "real face" score (0–1)
+    flash_matches       SMALLINT,                 -- flashes whose colour showed on the face
+    flash_total         SMALLINT,
+    turn_left           REAL,                     -- head turn measured in the "left" picture
+    turn_right          REAL,
+    same_person_score   REAL,                     -- lowest similarity between pictures of this check
+    capture_ms          INTEGER,                  -- time the client spent in front of the camera
+    processing_ms       INTEGER,                  -- server time to decide
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_identity_checks_client ON identity_checks(client_id, created_at);
 
 CREATE TRIGGER trg_form_submissions_updated_at
     BEFORE UPDATE ON form_submissions

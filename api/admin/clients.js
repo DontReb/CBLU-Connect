@@ -1,11 +1,12 @@
 import { pool } from '../../server/db.js';
 import { requireRole } from '../../server/auth.js';
 import { LOAN_FORM_CODE } from '../../server/loanForm.js';
+import { MAX_FAILED_TRIES } from '../../server/identity.js';
 
 // GET /api/admin/clients          → every client with their progress
 // GET /api/admin/clients?id=<id>  → one client: which requirements they've
-//                                   ticked, and how far their loan
-//                                   application is
+//                                   ticked, how far their loan application
+//                                   is, and their recent face checks
 //
 // Progress counts the items on the ACTIVE requirements checklist that the
 // client has ticked. Clients only tick what they have — nothing is
@@ -59,7 +60,14 @@ const CLIENT_QUERY = `
        WHERE f.template_id = (SELECT id FROM loan_form) AND f.is_required)::int AS "requiredFieldCount",
     (SELECT COUNT(*) FROM form_submission_values v
        JOIN form_template_fields f ON f.id = v.field_id AND f.is_required
-       WHERE v.submission_id = fs.id AND COALESCE(v.value, '') <> '')::int AS "requiredFilledCount"
+       WHERE v.submission_id = fs.id AND COALESCE(v.value, '') <> '')::int AS "requiredFilledCount",
+    (SELECT max(ic.created_at) FROM identity_checks ic
+       WHERE ic.client_id = u.id AND ic.passed) AS "identityVerifiedAt",
+    (SELECT COUNT(*) FROM identity_checks ic
+       WHERE ic.client_id = u.id AND NOT ic.passed
+         AND ic.created_at >= (date_trunc('day', now() AT TIME ZONE 'Asia/Manila') AT TIME ZONE 'Asia/Manila')
+    )::int AS "identityFailedToday",
+    (SELECT COUNT(*) FROM identity_checks ic WHERE ic.client_id = u.id)::int AS "identityCheckCount"
   FROM users u
   LEFT JOIN client_profiles cp ON cp.user_id = u.id
   LEFT JOIN form_submissions fs ON fs.client_id = u.id AND fs.template_id = (SELECT id FROM loan_form)
@@ -88,6 +96,12 @@ function toClient(row) {
           requiredTotal: row.requiredFieldCount,
         }
       : null,
+    identity: {
+      verifiedAt: row.identityVerifiedAt,
+      failedToday: row.identityFailedToday,
+      locked: row.identityFailedToday >= MAX_FAILED_TRIES,
+      checkCount: row.identityCheckCount,
+    },
   };
 }
 
@@ -111,9 +125,20 @@ async function getClient(res, id) {
     [id]
   );
 
+  // The 10 latest face checks: results and scores only (no pictures are kept).
+  const checks = await pool.query(
+    `SELECT created_at AS "at", id_type AS "idType", passed, face_verified AS "faceVerified", live,
+            failure_reason AS "reason", match_score AS "matchScore", real_face_score AS "realFaceScore",
+            flash_matches AS "flashMatches", flash_total AS "flashTotal",
+            capture_ms AS "captureMs", processing_ms AS "processingMs"
+     FROM identity_checks WHERE client_id = $1 ORDER BY created_at DESC LIMIT 10`,
+    [id]
+  );
+
   return res.status(200).json({
     client: {
       ...toClient(result.rows[0]),
+      identityChecks: checks.rows,
       items: items.rows.map((row) => ({
         id: row.id,
         label: row.label,

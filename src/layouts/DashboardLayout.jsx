@@ -36,6 +36,14 @@ const ICON_PATHS = {
       <path d="m15 15 5.5-5.5a1.4 1.4 0 0 0-2-2L13 13v2z" />
     </>
   ),
+  // Face inside scan corners — face check testing.
+  face: (
+    <>
+      <path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3" />
+      <circle cx="12" cy="11" r="3.5" />
+      <path d="M7.5 18c.9-1.8 2.5-2.8 4.5-2.8s3.6 1 4.5 2.8" />
+    </>
+  ),
   // Megaphone — Announcements.
   announcement: (
     <>

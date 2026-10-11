@@ -1,11 +1,19 @@
 {
   "rewrites": [
-    { "source": "/:path((?!api/|@|.*\\.).*)", "destination": "/index.html" }
+    {
+      "source": "/:path((?!api/|@|.*\\.).*)",
+      "destination": "/index.html"
+    }
   ],
   "functions": {
     "api/forms/ocr.js": {
       "maxDuration": 60,
-      "includeFiles": "{node_modules/tesseract.js-core/*.wasm,eng.traineddata}"
+      "includeFiles": "{node_modules/tesseract.js-core/*.wasm,eng.traineddata,models/face/yunet.onnx,node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.mjs,node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.wasm}",
+      "excludeFiles": "models/face/{sface,minifasnet_v2,minifasnet_v1se}.onnx"
+    },
+    "api/identity/face.js": {
+      "maxDuration": 60,
+      "includeFiles": "{models/face/*.onnx,node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.mjs,node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.wasm}"
     }
   }
 }

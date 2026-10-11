@@ -18,6 +18,11 @@ export const CHAT_RULES = [
     reply: 'Sure — let me connect you with a live agent.',
   },
   {
+    keywords: ['face check', 'face verification', 'face', 'selfie', 'camera', 'liveness', 'flash', 'flashing', 'tries'],
+    reply:
+      "After you scan your ID, a face check uses your camera to confirm the ID is yours: look straight, hold still while the screen flashes colours, then turn your head left and right as asked. Turn your screen brightness up and face a light. You have 3 tries a day; after that, scanning is locked until tomorrow and you can verify at any CBLU branch instead — you can still type the form by hand. The pictures are only checked, never saved.",
+  },
+  {
     keywords: ['password', 'forgot', 'log in', 'login', 'sign in', 'signin', 'locked', "can't log in", 'cannot log in'],
     reply:
       'Log in from the Log In button on our homepage, using the email and password the bank gave you. Password reset through the portal isn\'t available yet — if you can\'t get in, please contact your branch to reset it.',
@@ -35,12 +40,12 @@ export const CHAT_RULES = [
   {
     keywords: ['valid id', 'valid ids', 'id', 'ids', 'philsys', 'national id', 'passport', "driver's license", 'drivers license', 'license', 'scan', 'scanning'],
     reply:
-      "On the Loan Application page you can fill in your details from a photo of one valid ID: a PhilSys National ID, a Driver's License or a Passport. We read your name, birth date, sex, citizenship, address and civil status from it — please check them before saving. Your photo is only read, never saved.",
+      "On the Loan Application page you can fill in your details from a photo of one valid ID: a PhilSys National ID, a Driver's License or a Passport. We read your name, birth date, sex, citizenship, address and civil status, then a quick face check with your camera confirms the ID is yours before anything is filled in. Please check the details before saving. Your photos are only read, never saved.",
   },
   {
     keywords: ['loan', 'loans', 'business loan', 'salary loan', 'borrow', 'credit', 'capital', 'financing', 'apply'],
     reply:
-      "To apply for a loan, log in and open Loan Application in your client dashboard. Upload a photo of a valid ID and we'll fill in your personal details, then complete the rest of the form. Print it, sign it, and bring it to the bank with the documents on your Requirements page.",
+      "To apply for a loan, log in and open Loan Application in your client dashboard. Upload a photo of a valid ID and pass a quick face check, and we'll fill in your personal details; then complete the rest of the form. Print it, sign it, and bring it to the bank with the documents on your Requirements page.",
   },
   {
     keywords: ['open an account', 'open account', 'new account', 'savings account', 'savings', 'account opening', 'deposit'],

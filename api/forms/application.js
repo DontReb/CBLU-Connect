@@ -1,6 +1,7 @@
 import { pool } from '../../server/db.js';
 import { requireRole } from '../../server/auth.js';
 import { loadLoanForm, ensureSubmission, loadValues } from '../../server/loanForm.js';
+import { identityStatus } from '../../server/identity.js';
 
 // The client's loan application (one file, so it counts once toward
 // Vercel's free-plan function limit):
@@ -28,7 +29,7 @@ async function getApplication(res, client) {
 
     const submissionResult = await pool.query(
       `SELECT id, status, last_id_type AS "lastIdType", last_scan_at AS "lastScanAt",
-              updated_at AS "updatedAt"
+              identity_verified_at AS "identityVerifiedAt", updated_at AS "updatedAt"
        FROM form_submissions WHERE client_id = $1 AND template_id = $2`,
       [client.sub, template.id]
     );
@@ -52,9 +53,12 @@ async function getApplication(res, client) {
         status: submission.status,
         lastIdType: submission.lastIdType,
         lastScanAt: submission.lastScanAt,
+        identityVerifiedAt: submission.identityVerifiedAt,
         updatedAt: submission.updatedAt,
       },
       values,
+      // Face check: when it last passed, tries left today, locked or not.
+      identity: await identityStatus(pool, client.sub),
     });
   } catch (err) {
     console.error('Failed to load loan application:', err);
@@ -78,14 +82,18 @@ async function saveApplication(req, res, client) {
     db = await pool.connect();
     await db.query('BEGIN');
     const submission = await ensureSubmission(db, client.sub, form.template.id);
+    const saved = await loadValues(db, submission.id);
 
     for (const [fieldKey, entry] of Object.entries(incoming)) {
       const field = fieldByKey.get(fieldKey);
       if (!field) continue; // ignore anything that isn't a field on this form
 
       const value = typeof entry?.value === 'string' ? entry.value.trim().slice(0, 2000) : '';
-      // 'ocr' only stands for a value that really came from a scan.
-      const source = entry?.source === 'ocr' && field.idSource ? 'ocr' : 'manual';
+      // "From your ID" ('ocr') only stays on a value the server itself wrote
+      // after a passed face check, and only while it's unchanged. Anything
+      // the client sends or edits is 'manual'.
+      const before = saved[fieldKey];
+      const source = entry?.source === 'ocr' && before?.source === 'ocr' && before.value === value ? 'ocr' : 'manual';
 
       await db.query(
         `INSERT INTO form_submission_values (submission_id, field_id, value, source)
