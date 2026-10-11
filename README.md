@@ -353,4 +353,13 @@ the `api/` functions.
 1. Load CBLU's final ID list and requirements.
 2. Measure OCR accuracy on real ID photos (with consent) for the study.
 3. Fill the client profile from `client_profiles`.
+<<<<<<< HEAD
 4. Optionally move chatbot replies into the `chatbot_rules` table so admins can edit them.
+=======
+4. Allow editing and removing checklist items.
+5. Optionally move chatbot replies into the `chatbot_rules` table so admins can edit them.
+
+
+## Owner
+**Liv Clarence Torres**
+>>>>>>> origin/main
