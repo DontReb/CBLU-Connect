@@ -39,4 +39,10 @@ body {
     transition: none !important;
     scroll-behavior: auto !important;
   }
+  /* Edge adds its own "reveal password" eye; the login form has its own
+   Show/Hide button, so hide Edge's to avoid two. */
+input[type='password']::-ms-reveal,
+input[type='password']::-ms-clear {
+  display: none;
+}
 }
