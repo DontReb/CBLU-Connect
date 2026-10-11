@@ -4,6 +4,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
 import { createWorker } from 'tesseract.js';
+import { loadRgb } from './face/image.js';
+import { detectFaces } from './face/detect.js';
 
 // Runs OCR on ID photos for the loan application scan (api/forms/ocr.js).
 //
@@ -34,8 +36,39 @@ export function isSupportedImage(file) {
 // shadow across it. See "OCR accuracy" in the README.
 const PAGE_SEGMENTATION_MODE = '6';
 
-// How a photo is cleaned up before OCR. Both turn it upright (phones store
-// rotation separately, in EXIF) and grayscale.
+// The portrait on an ID sits right next to the text, and Tesseract reads
+// bits of it as letters on the same line ("LW © GARCIA"). So the face (and
+// the small "ghost" face some IDs have) is found with the face detector and
+// painted white before OCR. On the accepted IDs the portrait is on the left
+// with the text to its right, so the white area reaches left (hair and
+// background) and up and down, but stops just past the face's right edge —
+// a portrait can fill its frame, and the text can start right after it.
+async function withoutPortraits(filePath) {
+  const img = await loadRgb(filePath); // upright
+  const faces = (await detectFaces(img, { scoreThreshold: 0.7 }))
+    .filter((f) => f.box[2] >= img.width * 0.03); // ignore tiny false finds in the text
+  if (faces.length === 0) return sharp(filePath).rotate(); // untouched
+  const boxes = faces.map(({ box: [x, y, w, h] }) => {
+    const x1 = Math.max(0, Math.round(x - 0.45 * w));
+    const y1 = Math.max(0, Math.round(y - 0.6 * h));
+    const x2 = Math.min(img.width, Math.round(x + 1.03 * w));
+    const y2 = Math.min(img.height, Math.round(y + 1.7 * h));
+    return `<rect x="${x1}" y="${y1}" width="${x2 - x1}" height="${y2 - y1}" fill="#fff"/>`;
+  });
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${img.width}" height="${img.height}">${boxes.join('')}</svg>`;
+  // Lossless in between (PNG), so the letters aren't blurred by re-saving,
+  // and the photo's resolution (dpi) kept, which Tesseract uses.
+  const { density = 72 } = await sharp(filePath).metadata();
+  const masked = await sharp(Buffer.from(img.data), { raw: { width: img.width, height: img.height, channels: 3 } })
+    .composite([{ input: Buffer.from(svg) }])
+    .withMetadata({ density })
+    .png()
+    .toBuffer();
+  return sharp(masked);
+}
+
+// How a photo is cleaned up before OCR. Both start upright (phones store
+// rotation separately, in EXIF), with the portrait blanked, in grayscale.
 //   standard — resized to 1600 px wide: small photos get bigger letters,
 //              big ones get faster to read.
 //   flatten  — 2000 px wide, then divided by a heavily blurred copy of
@@ -43,7 +76,7 @@ const PAGE_SEGMENTATION_MODE = '6';
 //              a second try when the standard pass misses fields.
 async function prepare(filePath, mode) {
   const width = mode === 'flatten' ? 2000 : 1600;
-  const base = await sharp(filePath).rotate().grayscale().resize({ width }).png().toBuffer();
+  const base = await (await withoutPortraits(filePath)).grayscale().resize({ width }).png().toBuffer();
   if (mode !== 'flatten') return base;
   // colour-dodge with the inverted blur = photo ÷ blurred background
   const background = await sharp(base).blur(width / 40).negate().png().toBuffer();
