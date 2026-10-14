@@ -13,6 +13,9 @@ import Button from './ui/Button';
 //
 // App.jsx remounts this component whenever the logged-in user changes, so
 // one person's live chat is never left on screen for the next.
+//
+// The panel can be expanded to fill the screen (easier to read long answers
+// or a long live chat, and on phones); Esc or the same button shrinks it back.
 
 // The panel scales and rises in from the toggle button, like it's popping
 // out of it — and reverses the same way on close.
@@ -74,6 +77,7 @@ export default function ChatWidget({ isOpen, onClose, onToggle, user }) {
   const [liveChat, setLiveChat] = useState(null); // { id, status, agentName } while talking to a person
   const [connecting, setConnecting] = useState(false);
   const [unread, setUnread] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const listRef = useRef(null);
   const isOpenRef = useRef(isOpen);
   const newestIdRef = useRef(0);
@@ -92,7 +96,17 @@ export default function ChatWidget({ isOpen, onClose, onToggle, user }) {
     if (listRef.current) {
       listRef.current.scrollTop = listRef.current.scrollHeight;
     }
-  }, [messages, isOpen]);
+  }, [messages, isOpen, expanded]);
+
+  // Esc shrinks a full-screen chat back to its corner.
+  useEffect(() => {
+    if (!isOpen || !expanded) return undefined;
+    const onKey = (e) => {
+      if (e.key === 'Escape') setExpanded(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, expanded]);
 
   // After a page refresh, pick up a live chat the client already had open.
   useEffect(() => {
@@ -245,7 +259,7 @@ export default function ChatWidget({ isOpen, onClose, onToggle, user }) {
   const headerSubtitle = liveChatId ? (waitingForAgent ? 'Waiting for an agent…' : `with ${agentName}`) : null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-30 print:hidden">
+    <div className={`fixed bottom-6 right-6 print:hidden ${isOpen && expanded ? 'z-[55]' : 'z-30'}`}>
       <button
         type="button"
         onClick={handleToggle}
@@ -278,9 +292,14 @@ export default function ChatWidget({ isOpen, onClose, onToggle, user }) {
             style={{ transformOrigin: 'bottom right' }}
             role="dialog"
             aria-label="Chat with CBLU assistant"
-            className="absolute bottom-16 right-0 flex w-80 max-w-[calc(100vw-3rem)] flex-col overflow-hidden rounded-2xl border border-line bg-panel shadow-2xl shadow-ink/20"
+            className={
+              expanded
+                ? 'fixed inset-0 z-50 flex flex-col overflow-hidden bg-panel'
+                : 'absolute bottom-16 right-0 flex w-80 max-w-[calc(100vw-3rem)] flex-col overflow-hidden rounded-2xl border border-line bg-panel shadow-2xl shadow-ink/20'
+            }
           >
-            <div className="flex items-center justify-between gap-3 bg-ink px-4 py-3 text-white">
+            <div className="bg-ink text-white">
+            <div className={`flex items-center justify-between gap-3 px-4 py-3 ${expanded ? 'mx-auto w-full max-w-3xl' : ''}`}>
               <div className="min-w-0">
                 <p className="text-sm font-semibold">{headerTitle}</p>
                 {headerSubtitle && <p className="truncate text-xs text-white/70">{headerSubtitle}</p>}
@@ -295,13 +314,43 @@ export default function ChatWidget({ isOpen, onClose, onToggle, user }) {
                     End chat
                   </button>
                 )}
-                <button type="button" onClick={onClose} aria-label="Close chat" className="text-lg leading-none">
+                <button
+                  type="button"
+                  onClick={() => setExpanded((v) => !v)}
+                  aria-label="Full screen"
+                  aria-pressed={expanded}
+                  title={expanded ? 'Exit full screen (Esc)' : 'Full screen'}
+                  className="flex size-7 items-center justify-center rounded-full hover:bg-white/10"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="h-4 w-4">
+                    {expanded ? (
+                      <path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" />
+                    ) : (
+                      <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+                    )}
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setExpanded(false);
+                    onClose();
+                  }}
+                  aria-label="Close chat"
+                  className="flex size-7 items-center justify-center rounded-full text-lg leading-none hover:bg-white/10"
+                >
                   ×
                 </button>
               </div>
             </div>
+            </div>
 
-            <div ref={listRef} className="flex max-h-72 flex-col gap-2.5 overflow-y-auto px-4 py-3.5" aria-live="polite">
+            <div
+              ref={listRef}
+              className={`flex flex-col gap-2.5 overflow-y-auto px-4 py-3.5 ${expanded ? 'min-h-0 flex-1' : 'max-h-72'}`}
+              aria-live="polite"
+            >
+              <div className={`flex flex-col gap-2.5 ${expanded ? 'mx-auto w-full max-w-3xl' : ''}`}>
               {messages.map((m) => {
                 if (m.from === 'system') {
                   return (
@@ -333,9 +382,10 @@ export default function ChatWidget({ isOpen, onClose, onToggle, user }) {
                   </div>
                 );
               })}
+              </div>
             </div>
 
-            <div className="px-4 pb-2.5 text-xs text-ink-soft">
+            <div className={`px-4 pb-2.5 text-xs text-ink-soft ${expanded ? 'mx-auto w-full max-w-3xl' : ''}`}>
               {connecting ? (
                 <p>Connecting you to a live agent…</p>
               ) : liveChatId ? (
@@ -355,7 +405,8 @@ export default function ChatWidget({ isOpen, onClose, onToggle, user }) {
               )}
             </div>
 
-            <form onSubmit={handleSend} className="flex gap-2 border-t border-line p-3">
+            <form onSubmit={handleSend} className="border-t border-line p-3">
+              <div className={`flex gap-2 ${expanded ? 'mx-auto w-full max-w-3xl' : ''}`}>
               <input
                 type="text"
                 value={draft}
@@ -368,6 +419,7 @@ export default function ChatWidget({ isOpen, onClose, onToggle, user }) {
               <Button type="submit" variant="primary" disabled={connecting} className="px-4 py-2.5 text-sm">
                 Send
               </Button>
+              </div>
             </form>
           </motion.div>
         )}

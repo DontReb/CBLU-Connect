@@ -72,7 +72,8 @@ Open a normal window for Maria and a private (incognito) window for Carlo, side 
 **Guests** (not logged in)
 - Read about CBLU, its services and branch location.
 - Ask the chatbot, which appears on every page, about loans, valid IDs, requirements,
-  printing the form, logging in, branches and hours.
+  printing the form, logging in, branches and hours. The chat can be expanded to full
+  screen (Esc shrinks it back).
 - Log in. Asking the chatbot for a person prompts them to log in first.
 
 **Clients**
@@ -88,13 +89,16 @@ Open a normal window for Maria and a private (incognito) window for Carlo, side 
   form by hand. Photos and camera pictures are deleted right after checking; neither they,
   nor the ID's text, nor any face data is saved.
 - Complete the rest of the form (99 fields in 6 sections, saved and resumable). Optional
-  sections — spouse, collateral, co-makers — start folded away.
+  sections — spouse, collateral, co-makers — start folded away. **Clear form** erases every
+  answer (after a confirmation), including the last scan's details.
 - **Print form:** CBLU's form laid out like the paper original on long bond paper
   (8.5 × 13 in; A4, Letter and Legal also fit), with the client's answers filled in, the
   borrower's printed name on the signature line, and blank space for everything the form
   keeps on paper (bank and other assets, credit information, references, signatures,
   For Bank's Use Only). The last page is the requirements checklist with their ticks.
 - **Requirements:** tick each document they already have.
+- **Announcements:** every announcement from the bank, newest first (the overview shows
+  the latest three).
 - Chat with a live agent. The agent sees the conversation the client had with the bot.
 
 **Administrators**
@@ -387,7 +391,7 @@ CBLU-Connect/
 │   │   └── mockClient.js         Profile page sample data (see status below)
 │   └── pages/
 │       ├── LandingPage.jsx, LoginPage.jsx
-│       ├── client/               Overview, Loan Application, Requirements, Profile,
+│       ├── client/               Overview, Loan Application, Requirements, Announcements, Profile,
 │       │                         ClientLoanApplicationPrint.jsx (+ its .css)
 │       ├── admin/                Overview, Clients, Announcements, Requirements,
 │       │                         AdminFaceTest.jsx (records test sessions)

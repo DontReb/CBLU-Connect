@@ -35,7 +35,12 @@ function AnnouncementsCard() {
 
   return (
     <div className="rounded-2xl border border-line bg-panel p-6 shadow-sm">
-      <h2 className="mb-3 text-lg font-semibold text-ink">Announcements</h2>
+      <div className="mb-3 flex items-baseline justify-between gap-3">
+        <h2 className="text-lg font-semibold text-ink">Announcements</h2>
+        <Link to="/dashboard/client/announcements" className="text-sm font-medium text-accent-dark hover:underline">
+          See all
+        </Link>
+      </div>
       <ul className="space-y-4">
         {announcements.map((announcement) => (
           <li key={announcement.id} className="border-l-2 border-accent pl-4">

@@ -67,7 +67,9 @@ async function getApplication(res, client) {
 }
 
 // Body: { values: { [fieldKey]: { value: string, source: 'ocr' | 'manual' } } }
+//    or { clear: true } — erase every answer (the "Clear form" button)
 async function saveApplication(req, res, client) {
+  if (req.body?.clear === true) return clearApplication(res, client);
   const incoming = req.body?.values;
   if (!incoming || typeof incoming !== 'object') {
     return res.status(400).json({ error: 'values is required' });
@@ -117,6 +119,39 @@ async function saveApplication(req, res, client) {
     if (db) await db.query('ROLLBACK').catch(() => {});
     console.error('Failed to save loan application:', err);
     return res.status(500).json({ error: 'Failed to save loan application' });
+  } finally {
+    if (db) db.release();
+  }
+}
+
+// Erases all of this client's answers and the details of their last scan.
+// Their face check history and requirement ticks are not touched.
+async function clearApplication(res, client) {
+  let db;
+  try {
+    const form = await loadLoanForm();
+    if (!form) return res.status(404).json({ error: 'Loan application form is not set up yet' });
+
+    db = await pool.connect();
+    await db.query('BEGIN');
+    const submission = await ensureSubmission(db, client.sub, form.template.id);
+    await db.query('DELETE FROM form_submission_values WHERE submission_id = $1', [submission.id]);
+    const updated = await db.query(
+      `UPDATE form_submissions
+       SET last_id_type = NULL, last_scan_at = NULL, last_ocr_confidence = NULL, updated_at = now()
+       WHERE id = $1
+       RETURNING updated_at AS "updatedAt"`,
+      [submission.id]
+    );
+    await db.query('COMMIT');
+    return res.status(200).json({
+      cleared: true,
+      submission: { status: submission.status, lastIdType: null, lastScanAt: null, updatedAt: updated.rows[0].updatedAt },
+    });
+  } catch (err) {
+    if (db) await db.query('ROLLBACK').catch(() => {});
+    console.error('Failed to clear loan application:', err);
+    return res.status(500).json({ error: 'Failed to clear the form' });
   } finally {
     if (db) db.release();
   }

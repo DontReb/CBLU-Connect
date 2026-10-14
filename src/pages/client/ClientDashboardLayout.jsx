@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { to: '/dashboard/client', label: 'Overview', icon: 'home', end: true },
   { to: '/dashboard/client/loan-application', label: 'Loan Application', icon: 'form' },
   { to: '/dashboard/client/requirements', label: 'Requirements', icon: 'document' },
+  { to: '/dashboard/client/announcements', label: 'Announcements', icon: 'announcement' },
   { to: '/dashboard/client/profile', label: 'Profile', icon: 'user' },
 ];
 

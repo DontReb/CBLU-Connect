@@ -230,6 +230,54 @@ function FormSection({ section, fields, values, open, onToggle, onFieldChange })
   );
 }
 
+// --- "Clear form" confirmation --------------------------------------------------------
+
+function ClearFormDialog({ filledCount, clearing, error, onConfirm, onCancel }) {
+  const cancelRef = useRef(null);
+  useEffect(() => {
+    cancelRef.current?.focus(); // the safe choice has focus when it opens
+  }, []);
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Escape' && !clearing) onCancel();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [clearing, onCancel]);
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-ink/60 p-4" role="alertdialog" aria-modal="true" aria-labelledby="clear-title" aria-describedby="clear-desc">
+      <div className="w-full max-w-sm rounded-2xl bg-panel p-5 shadow-xl">
+        <h2 id="clear-title" className="text-lg font-semibold text-ink">Clear the whole form?</h2>
+        <p id="clear-desc" className="mt-2 text-sm text-ink">
+          This erases every answer in your loan application ({filledCount}{' '}
+          {filledCount === 1 ? 'field' : 'fields'} filled in), including any details from your ID scan. It can't be
+          undone.
+        </p>
+        <p className="mt-2 text-xs text-ink-soft">Your requirements ticks and face check are not affected.</p>
+        {error && (
+          <p role="alert" className="mt-2 text-sm text-red-700">
+            {error}
+          </p>
+        )}
+        <div className="mt-4 flex justify-end gap-2">
+          <Button ref={cancelRef} type="button" variant="ghost" onClick={onCancel} disabled={clearing} className="px-4 py-2 text-sm">
+            Cancel
+          </Button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={clearing}
+            className="rounded-full bg-red-700 px-5 py-2 text-sm font-medium text-white hover:bg-red-800 disabled:opacity-60"
+          >
+            {clearing ? 'Clearing…' : 'Clear form'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // --- page --------------------------------------------------------------------------
 
 export default function ClientLoanApplication() {
@@ -257,6 +305,10 @@ export default function ClientLoanApplication() {
 
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
+
+  const [confirmClear, setConfirmClear] = useState(false);
+  const [clearing, setClearing] = useState(false);
+  const [clearError, setClearError] = useState('');
 
   useEffect(() => {
     let ignore = false;
@@ -292,6 +344,7 @@ export default function ClientLoanApplication() {
     () => Object.fromEntries(form.fields.map((field) => [field.fieldKey, field.label])),
     [form.fields]
   );
+  const filledCount = form.fields.filter((field) => (values[field.fieldKey]?.value ?? '') !== '').length;
   const missingRequiredCount = form.fields.filter(
     (field) => field.isRequired && !(values[field.fieldKey]?.value ?? '').trim()
   ).length;
@@ -340,6 +393,33 @@ export default function ClientLoanApplication() {
   async function handleSave(e) {
     e.preventDefault();
     if (!saving) await save();
+  }
+
+  async function clearForm() {
+    setClearing(true);
+    setClearError('');
+    try {
+      const res = await fetch('/api/forms/application', {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clear: true }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Clearing failed — try again.');
+      setValues({});
+      setHasUnsavedChanges(false);
+      setLastSavedAt(data.submission?.updatedAt ?? new Date().toISOString());
+      setOpenOverrides({});
+      setScanResult(null);
+      setPendingScan(null);
+      setSaveError('');
+      setConfirmClear(false);
+    } catch (err) {
+      setClearError(err.message || 'Clearing failed — try again.');
+    } finally {
+      setClearing(false);
+    }
   }
 
   async function handlePrint() {
@@ -569,6 +649,16 @@ export default function ClientLoanApplication() {
         {scanResult && <ScanSummary result={scanResult} labelByKey={labelByKey} />}
       </section>
 
+      {confirmClear && (
+        <ClearFormDialog
+          filledCount={filledCount}
+          clearing={clearing}
+          error={clearError}
+          onConfirm={clearForm}
+          onCancel={() => setConfirmClear(false)}
+        />
+      )}
+
       {challenge && (
         <FaceCheck challenge={challenge} onComplete={handleFaceCaptured} onCancel={() => setChallenge(null)} />
       )}
@@ -610,7 +700,18 @@ export default function ClientLoanApplication() {
                 : `${missingRequiredCount} required field${missingRequiredCount === 1 ? '' : 's'} (*) still empty.`}
             </p>
           </div>
-          <div className="flex shrink-0 gap-2">
+          <div className="flex shrink-0 flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setClearError('');
+                setConfirmClear(true);
+              }}
+              disabled={saving || filledCount === 0}
+              className="rounded-full px-3 py-2.5 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Clear form
+            </button>
             <Button type="button" variant="ghost" onClick={handlePrint} disabled={saving} className="px-4 py-2.5 text-sm">
               Print form
             </Button>
