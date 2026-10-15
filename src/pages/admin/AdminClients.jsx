@@ -1,5 +1,7 @@
 import { Fragment, useState } from 'react';
 import { useAdminData } from '../../lib/adminDataContext';
+import Button from '../../components/ui/Button';
+import AddClientForm from './AddClientForm';
 import { ID_TYPE_LABELS, IDENTITY_REASONS, applicationStage, documentsReady, identityStage } from '../../lib/applicationStatus';
 
 const STAGE_STYLES = {
@@ -93,6 +95,7 @@ export default function AdminClients() {
   const { clients, clientsStatus, loadClientDetail } = useAdminData();
   const [openId, setOpenId] = useState(null);
   const [details, setDetails] = useState({});
+  const [adding, setAdding] = useState(false);
 
   async function toggle(id) {
     if (openId === id) {
@@ -111,11 +114,26 @@ export default function AdminClients() {
 
   return (
     <div className="mx-auto max-w-5xl">
-      <h1 className="font-display text-2xl font-medium text-ink md:text-3xl">Clients</h1>
-      <p className="mt-1 text-sm text-ink-soft">
-        How far each client is with their face check, loan application and the documents they need to
-        bring.
-      </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="font-display text-2xl font-medium text-ink md:text-3xl">Clients</h1>
+          <p className="mt-1 text-sm text-ink-soft">
+            How far each client is with their face check, loan application and the documents they need to
+            bring.
+          </p>
+        </div>
+        {!adding && (
+          <Button type="button" onClick={() => setAdding(true)} className="shrink-0 px-5 py-2.5 text-sm">
+            Add client
+          </Button>
+        )}
+      </div>
+
+      {adding && (
+        <div className="mt-6">
+          <AddClientForm onClose={() => setAdding(false)} />
+        </div>
+      )}
 
       {clientsStatus === 'error' && (
         <p className="mt-6 rounded-2xl border border-line bg-panel p-5 text-sm text-red-700">
@@ -130,7 +148,7 @@ export default function AdminClients() {
       )}
 
       {clientsStatus === 'ready' && clients.length > 0 && (
-        <div className="mt-6 overflow-x-auto rounded-2xl border border-line bg-panel shadow-sm">
+        <div className="relative mt-6 overflow-x-auto rounded-2xl border border-line bg-panel shadow-sm">
           <table className="w-full min-w-[820px] text-left text-sm">
             <thead>
               <tr className="border-b border-line text-ink-soft">

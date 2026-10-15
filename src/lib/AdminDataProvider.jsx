@@ -71,6 +71,14 @@ export default function AdminDataProvider({ children }) {
     setChecklistItems((prev) => prev.filter((existing) => existing.id !== id));
   }, []);
 
+  // Creates a client account. Returns the generated password (shown to the
+  // admin once), or null when the admin typed one.
+  const addClient = useCallback(async (details) => {
+    const data = await requestJson('/api/admin/clients', { method: 'POST', body: JSON.stringify(details) });
+    setClients((prev) => [...prev, data.client].sort((a, b) => a.fullName.localeCompare(b.fullName)));
+    return { client: data.client, password: data.password };
+  }, []);
+
   // One client's ticked requirements, loaded when an admin opens their row.
   const loadClientDetail = useCallback(async (id) => {
     const data = await requestJson(`/api/admin/clients?id=${id}`);
@@ -88,8 +96,9 @@ export default function AdminDataProvider({ children }) {
       updateChecklistItem,
       deleteChecklistItem,
       loadClientDetail,
+      addClient,
     }),
-    [clients, clientsStatus, checklist, checklistItems, checklistStatus, addChecklistItem, updateChecklistItem, deleteChecklistItem, loadClientDetail]
+    [clients, clientsStatus, checklist, checklistItems, checklistStatus, addChecklistItem, updateChecklistItem, deleteChecklistItem, loadClientDetail, addClient]
   );
 
   return <AdminDataContext.Provider value={value}>{children}</AdminDataContext.Provider>;

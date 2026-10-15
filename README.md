@@ -45,6 +45,11 @@ All three accounts share one password: **`CbluTest123!`**
 They are created by `db/seed-users.sql`. They are for testing only: replace or remove
 them before real clients use the system.
 
+**New client accounts** are made by an administrator: **Clients → Add client**. There's no
+public sign-up, so the bank decides who gets an account. Leave the password empty to get a
+generated one (like `Kp7m-Qx3t-Rw9z`); it is shown once, with a button to copy the login
+details for the client.
+
 **Trying the ID scan without a real ID:** `tests/ocr-samples/` has specimen cards of
 fictional people (marked "SPECIMEN - NOT A REAL ID"). On the Loan Application page,
 choose `tests/ocr-samples/standard/p2_philsys_front_photo.jpg` as the front and
@@ -102,6 +107,8 @@ Open a normal window for Maria and a private (incognito) window for Carlo, side 
 - Chat with a live agent. The agent sees the conversation the client had with the bot.
 
 **Administrators**
+- Create client accounts (name, email, and optionally mobile number, branch, account
+  number and password).
 - See every client: face check status (verified / failed today / locked), application
   progress (not started / required fields filled / form complete), which ID filled it, and
   how many requirements they've ticked — open a client to see their latest face checks
@@ -320,6 +327,7 @@ CBLU-Connect/
 │   │   └── me.js                 GET  — who is logged in
 │   ├── admin/
 │   │   ├── clients.js            GET  — clients + progress; ?id= one client's ticks
+│   │   │                         POST — create a client account
 │   │   └── checklist-items.js    GET/POST/PUT/DELETE — the requirements checklist
 │   ├── client/
 │   │   └── checklist.js          GET/PUT — the client's requirements and their ticks

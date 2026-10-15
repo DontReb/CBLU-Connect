@@ -1,23 +1,32 @@
+import crypto from 'crypto';
 import { pool } from '../../server/db.js';
-import { requireRole } from '../../server/auth.js';
+import { requireRole, hashPassword } from '../../server/auth.js';
 import { LOAN_FORM_CODE } from '../../server/loanForm.js';
 import { MAX_FAILED_TRIES } from '../../server/identity.js';
 
-// GET /api/admin/clients          → every client with their progress
+// GET  /api/admin/clients          → every client with their progress
 // GET /api/admin/clients?id=<id>  → one client: which requirements they've
 //                                   ticked, how far their loan application
 //                                   is, and their recent face checks
+// POST /api/admin/clients          → create a client account (the bank
+//                                   creates accounts; there's no public
+//                                   sign-up). Body: { fullName, email,
+//                                   phoneNumber?, branch?, accountNumber?,
+//                                   password? } — leave password out to get
+//                                   a generated one, returned ONCE.
 //
 // Progress counts the items on the ACTIVE requirements checklist that the
 // client has ticked. Clients only tick what they have — nothing is
 // uploaded — so this shows readiness, not verified documents.
 export default async function handler(req, res) {
-  if (req.method !== 'GET') {
+  if (req.method !== 'GET' && req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   const admin = requireRole(req, res, 'admin');
   if (!admin) return;
+
+  if (req.method === 'POST') return createClient(req, res);
 
   try {
     if (req.query?.id) return await getClient(res, String(req.query.id));
@@ -148,4 +157,77 @@ async function getClient(res, id) {
       })),
     },
   });
+}
+
+// --- creating a client account ----------------------------------------------------
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_PATTERN = /^\+?[0-9][0-9 -]{6,18}$/;
+const MIN_PASSWORD_LENGTH = 8;
+
+// Easy to read aloud or type from a printout: no 0/O, 1/l/I.
+const PASSWORD_LETTERS = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+
+function generatePassword() {
+  const group = () => Array.from({ length: 4 }, () => PASSWORD_LETTERS[crypto.randomInt(PASSWORD_LETTERS.length)]).join('');
+  return `${group()}-${group()}-${group()}`; // e.g. Kp7m-Qx3t-Rw9z
+}
+
+function text(value, max) {
+  return typeof value === 'string' ? value.trim().slice(0, max) : '';
+}
+
+async function createClient(req, res) {
+  const fullName = text(req.body?.fullName, 255);
+  const email = text(req.body?.email, 255).toLowerCase();
+  const phoneNumber = text(req.body?.phoneNumber, 20);
+  const branch = text(req.body?.branch, 100);
+  const accountNumber = text(req.body?.accountNumber, 50);
+  const typedPassword = typeof req.body?.password === 'string' ? req.body.password : '';
+
+  if (fullName.length < 2) return res.status(400).json({ error: "Enter the client's full name." });
+  if (!EMAIL_PATTERN.test(email)) return res.status(400).json({ error: 'Enter a valid email address.' });
+  if (phoneNumber && !PHONE_PATTERN.test(phoneNumber)) {
+    return res.status(400).json({ error: 'Enter a valid mobile number, e.g. 0917 123 4567.' });
+  }
+  if (typedPassword && typedPassword.length < MIN_PASSWORD_LENGTH) {
+    return res.status(400).json({ error: `The password needs at least ${MIN_PASSWORD_LENGTH} characters.` });
+  }
+  const password = typedPassword || generatePassword();
+
+  let db;
+  try {
+    db = await pool.connect();
+    await db.query('BEGIN');
+    const user = await db.query(
+      `INSERT INTO users (email, password_hash, full_name, role, phone_number)
+       VALUES ($1, $2, $3, 'client', $4)
+       RETURNING id`,
+      [email, await hashPassword(password), fullName, phoneNumber || null]
+    );
+    const id = user.rows[0].id;
+    await db.query(
+      `INSERT INTO client_profiles (user_id, account_number, branch)
+       VALUES ($1, $2, $3)`,
+      [id, accountNumber || null, branch || null]
+    );
+    await db.query('COMMIT');
+
+    const result = await pool.query(`${CLIENT_QUERY} AND u.id = $2`, [LOAN_FORM_CODE, id]);
+    return res.status(201).json({
+      client: toClient(result.rows[0]),
+      // Only sent now, never again: the database keeps just its hash.
+      password: typedPassword ? null : password,
+    });
+  } catch (err) {
+    if (db) await db.query('ROLLBACK').catch(() => {});
+    if (err?.code === '23505') {
+      const field = /account_number/.test(err.constraint ?? err.detail ?? '') ? 'account number' : 'email';
+      return res.status(409).json({ error: `Another account already uses this ${field}.` });
+    }
+    console.error('Failed to create client:', err);
+    return res.status(500).json({ error: 'Failed to create the account' });
+  } finally {
+    if (db) db.release();
+  }
 }
