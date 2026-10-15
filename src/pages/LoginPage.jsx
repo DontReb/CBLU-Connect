@@ -41,6 +41,8 @@ export default function LoginPage() {
 
       if (!res.ok) {
         setError(data.error || 'Something went wrong. Please try again.');
+        // 429 = too many wrong passwords; logging in is paused for a while.
+        if (res.status === 429) setPassword('');
         setStatus('idle');
         return;
       }
@@ -117,7 +119,11 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {error && <p className="text-sm text-red-600">{error}</p>}
+            {error && (
+              <p role="alert" className="text-sm text-red-600">
+                {error}
+              </p>
+            )}
 
             <Button
               type="submit"

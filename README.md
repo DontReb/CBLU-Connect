@@ -45,6 +45,15 @@ All three accounts share one password: **`CbluTest123!`**
 They are created by `db/seed-users.sql`. They are for testing only: replace or remove
 them before real clients use the system.
 
+**Wrong passwords.** After 5 wrong passwords within 15 minutes, logging in to that account
+pauses for 15 minutes (and 20 wrong passwords from one internet address pause that
+address). If you lock a test account while testing, wait 15 minutes, or run this in
+Neon's SQL Editor:
+
+```
+DELETE FROM login_attempts WHERE email = 'maria.santos@cblu.test';
+```
+
 **New client accounts** are made by an administrator: **Clients → Add client**. There's no
 public sign-up, so the bank decides who gets an account. Leave the password empty to get a
 generated one (like `Kp7m-Qx3t-Rw9z`); it is shown once, with a button to copy the login
@@ -297,7 +306,7 @@ protected folder, share them only within the study, and delete them when it ends
 | Frontend | React 19, Vite 8, React Router 7, Tailwind CSS 4, Motion, Leaflet (map) |
 | Backend | Vercel serverless functions (Node.js) |
 | Database | PostgreSQL on Neon, connected through Vercel |
-| Login | bcryptjs password hashing, JWT session in an HTTP-only cookie (7 days) |
+| Login | bcryptjs password hashing, JWT session in an HTTP-only cookie (7 days), limit on wrong passwords |
 | OCR | Tesseract.js 7, with sharp for photo clean-up |
 | Face check | ONNX Runtime Web 1.30 (WebAssembly, in the browser and on the server) running YuNet, SFace and MiniFASNet |
 | File uploads | formidable; fflate zips test recordings in the browser |
@@ -322,7 +331,7 @@ CBLU-Connect/
 ├── api/                          Serverless functions. EVERY .js file here is one
 │   │                             Vercel function — the free plan allows 12; this uses 11
 │   ├── auth/
-│   │   ├── login.js              POST — check email + password, set the session cookie
+│   │   ├── login.js              POST — check email + password (with the attempt limit), set the session cookie
 │   │   ├── logout.js             POST — clear the session cookie
 │   │   └── me.js                 GET  — who is logged in
 │   ├── admin/
@@ -343,6 +352,7 @@ CBLU-Connect/
 ├── server/                       Shared backend code, kept OUTSIDE api/ so it doesn't
 │   │                             count as a function
 │   ├── auth.js                   Password hashing, sessions, requireRole()
+│   ├── loginLimit.js             Wrong-password limit: 5 per account, 20 per address, 15-minute pause
 │   ├── db.js                     Database connection (SSL always on)
 │   ├── ocr.js                    Photo clean-up (sharp, portrait blanked) + Tesseract.js
 │   ├── idParsers.js              Reads PhilSys / Driver's License / Passport text
@@ -376,6 +386,7 @@ CBLU-Connect/
 │   ├── announcements_schema.sql  Announcements table
 │   ├── migrate_id_scan.sql       ONE-TIME update for a database set up before Oct 2026
 │   ├── migrate_face_check.sql    ONE-TIME update adding the face check tables
+│   ├── migrate_login_limit.sql   ONE-TIME update adding the login_attempts table
 │   └── run-sql.js                node db/run-sql.js <file> — runs a .sql file
 │
 ├── src/
@@ -481,6 +492,15 @@ node db/run-sql.js db/migrate_face_check.sql
 It adds the `identity_checks` table and two columns to `form_submissions`, and keeps all
 data. Running it twice does no harm.
 
+*Database set up before the login attempt limit* — run this, once:
+
+```
+node db/run-sql.js db/migrate_login_limit.sql
+```
+
+It adds the `login_attempts` table and keeps all data. Running it twice does no harm.
+Until it's run, every login fails with "Login failed".
+
 Neon's browser query editor can't run files with several statements, so always use the
 helper script. An "already exists" error means that file has already been run.
 
@@ -524,6 +544,7 @@ open a Vercel preview address, since browsers only allow the camera over HTTPS.
 | Feature | Status |
 |---|---|
 | Login, logout, role-based pages and API | Done |
+| Login attempt limit (5 wrong passwords → 15-minute pause; 20 per address) | Done |
 | Chatbot on every page (rule-based replies in `chatRules.js`) | Done |
 | Live chat between client and agent | Done — polling every 3–4 seconds |
 | Client: ID scan fills the loan form (PhilSys, Driver's License, Passport) | Done |
@@ -561,6 +582,8 @@ open a Vercel preview address, since browsers only allow the camera over HTTPS.
   are told to verify at a branch.
 - **The application is printed, not submitted online.** The bank sees how far a client is,
   but receives the signed form and documents on paper.
+- **Passwords** can't be reset or changed in the portal yet; a client who forgets one asks
+  the branch. The login pause lifts on its own after 15 minutes — admins can't lift it early.
 - **Live chat** is for logged-in clients only. There is no "no agent online" notice.
 - **Chatbot replies** live in `chatRules.js`. The `chatbot_rules` table exists but isn't
   used yet.

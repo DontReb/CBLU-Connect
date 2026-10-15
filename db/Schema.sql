@@ -30,6 +30,26 @@ CREATE TABLE users (
 CREATE INDEX idx_users_role ON users(role);
 
 -- ----------------------------------------------------------------------------
+-- LOGIN ATTEMPTS — every login try, right or wrong, for the attempt limit
+-- (server/loginLimit.js). Email is what was typed, so it may not match an
+-- account; user_id is set only when it does. Rows older than 30 days are
+-- deleted automatically.
+-- ----------------------------------------------------------------------------
+
+CREATE TABLE login_attempts (
+    id              BIGSERIAL PRIMARY KEY,
+    email           VARCHAR(255) NOT NULL,
+    ip              VARCHAR(64) NOT NULL,
+    user_id         UUID REFERENCES users(id) ON DELETE SET NULL,
+    succeeded       BOOLEAN NOT NULL,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_login_attempts_email ON login_attempts(email, created_at);
+CREATE INDEX idx_login_attempts_ip ON login_attempts(ip, created_at);
+CREATE INDEX idx_login_attempts_created ON login_attempts(created_at);
+
+-- ----------------------------------------------------------------------------
 -- ADMIN — internal staff who manage chatbot rules, agents, and content.
 -- ----------------------------------------------------------------------------
 

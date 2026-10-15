@@ -25,7 +25,7 @@ export const CHAT_RULES = [
   {
     keywords: ['password', 'forgot', 'log in', 'login', 'sign in', 'signin', 'locked', "can't log in", 'cannot log in'],
     reply:
-      'Log in from the Log In button on our homepage, using the email and password the bank gave you. Password reset through the portal isn\'t available yet — if you can\'t get in, please contact your branch to reset it.',
+      'Log in from the Log In button on our homepage, using the email and password the bank gave you. For your security, 5 wrong passwords in a row pause logging in to that account for 15 minutes. Password reset through the portal isn\'t available yet — if you can\'t get in, please contact your branch to reset it.',
   },
   {
     keywords: ['interest', 'interest rate', 'rate', 'rates', 'fee', 'fees', 'charges'],
