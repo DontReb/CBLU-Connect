@@ -23,6 +23,11 @@ CREATE TABLE users (
     role            user_role NOT NULL DEFAULT 'client',
     phone_number    VARCHAR(20),
     is_active       BOOLEAN NOT NULL DEFAULT TRUE,
+    -- Set when the bank gives a temporary password (new account, reset);
+    -- the client must choose their own at their next login.
+    must_change_password  BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Sessions started before this are ended (other devices are logged out).
+    password_changed_at   TIMESTAMPTZ,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );

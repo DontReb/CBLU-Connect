@@ -61,7 +61,9 @@ screen again while testing, withdraw consent on the client's **Privacy** page.
 **New client accounts** are made by an administrator: **Clients → Add client**. There's no
 public sign-up, so the bank decides who gets an account. Leave the password empty to get a
 generated one (like `Kp7m-Qx3t-Rw9z`); it is shown once, with a button to copy the login
-details for the client.
+details for the client. Either way it's a **temporary password**: the first time the client
+logs in, they choose their own before anything else. A client who forgets their password
+asks the branch, where an admin uses **Clients → Details → Reset password**.
 
 **Trying the ID scan without a real ID:** `tests/ocr-samples/` has specimen cards of
 fictional people (marked "SPECIMEN - NOT A REAL ID"). On the Loan Application page,
@@ -128,10 +130,20 @@ Open a normal window for Maria and a private (incognito) window for Carlo, side 
 - Chat with a live agent. The agent sees the conversation the client had with the bot.
 - **Privacy:** see what they've agreed to and when, withdraw either consent (as easily as
   they gave it), and find how to reach the Data Protection Officer.
+- **Profile:** their details from the bank (name, email, mobile number, branch, account
+  number, client since), whether a face check has verified their identity, and **change
+  password**. They can change their mobile number themselves; the rest is the bank's to
+  change. Password rules: at least 8 characters, with a letter and a number. Wrong current
+  passwords count toward the login limit. Changing the password logs out their other
+  devices.
+- After logging in with a **temporary password** from the bank (new account or reset),
+  choose their own password before anything else.
 
 **Administrators**
 - Create client accounts (name, email, and optionally mobile number, branch, account
   number and password).
+- **Reset a client's password** (Clients → Details): a new temporary password, shown once.
+  It logs the client out everywhere and lifts a login pause.
 - See every client: face check status (verified / failed today / locked), application
   progress (not started / required fields filled / form complete), which ID filled it, and
   how many requirements they've ticked — open a client to see their latest face checks
@@ -348,8 +360,9 @@ CBLU-Connect/
 │   ├── auth/
 │   │   ├── login.js              POST — check email + password (with the attempt limit), set the session cookie
 │   │   ├── logout.js             POST — clear the session cookie
-│   │   └── me.js                 GET  — who is logged in (+ a client's privacy consents)
+│   │   └── me.js                 GET  — who is logged in (+ a client's consents and profile)
 │   │                             POST — a client agrees to or withdraws a consent
+│   │                             PUT  — change password · PATCH — change mobile number
 │   ├── admin/
 │   │   ├── clients.js            GET  — clients + progress; ?id= one client's ticks
 │   │   │                         POST — create a client account
@@ -370,6 +383,7 @@ CBLU-Connect/
 │   ├── auth.js                   Password hashing, sessions, requireRole()
 │   ├── loginLimit.js             Wrong-password limit: 5 per account, 20 per address, 15-minute pause
 │   ├── privacy.js                Consent records; requireConsent() for endpoints with personal data
+│   ├── account.js                The user's own account row, profile, "session older than password?"
 │   ├── db.js                     Database connection (SSL always on)
 │   ├── ocr.js                    Photo clean-up (sharp, portrait blanked) + Tesseract.js
 │   ├── idParsers.js              Reads PhilSys / Driver's License / Passport text
@@ -386,6 +400,7 @@ CBLU-Connect/
 │       └── verify.js             The decision: face verification + liveness, thresholds
 │
 ├── shared/privacy.js              Privacy notice version, consent wording, DPO contact
+├── shared/account.js              Password rules and mobile number format
 ├── shared/face/                  Used by both the browser and the server
 │   ├── yunet.js                  YuNet input/output decoding
 │   ├── pose.js                   Head turn from the 5 landmarks
@@ -406,6 +421,7 @@ CBLU-Connect/
 │   ├── migrate_face_check.sql    ONE-TIME update adding the face check tables
 │   ├── migrate_login_limit.sql   ONE-TIME update adding the login_attempts table
 │   ├── migrate_privacy_consent.sql  ONE-TIME update adding the privacy_consents table
+│   ├── migrate_account_settings.sql ONE-TIME update for change password / temporary passwords
 │   └── run-sql.js                node db/run-sql.js <file> — runs a .sql file
 │
 ├── src/
@@ -413,6 +429,7 @@ CBLU-Connect/
 │   ├── layouts/DashboardLayout.jsx   Sidebar + top bar shared by all dashboards
 │   ├── components/
 │   │   ├── ChatWidget.jsx        The chatbot + live chat, shown on every page
+│   │   ├── ChangePasswordForm.jsx  Current + new password form (Profile, temporary password)
 │   │   ├── FaceCheck.jsx         The face check's camera screen
 │   │   ├── DynamicFormField.jsx  Draws one loan form field from the database
 │   │   ├── RequireRole.jsx       Sends users to /login or their own dashboard
@@ -426,11 +443,11 @@ CBLU-Connect/
 │   │   ├── chatApi.js            Calls api/chat.js
 │   │   ├── *Context.js / *Provider.jsx   Shared state: login, chat, checklist,
 │   │   │                                 admin data, agent queue, privacy consents
-│   │   └── mockClient.js         Profile page sample data (see status below)
 │   └── pages/
 │       ├── LandingPage.jsx, LoginPage.jsx, PrivacyNotice.jsx
 │       ├── client/               Overview, Loan Application, Requirements, Announcements, Profile,
 │       │                         Privacy, PrivacyConsent.jsx (the consent screen),
+│       │                         SetNewPassword.jsx (after a temporary password),
 │       │                         ClientLoanApplicationPrint.jsx (+ its .css)
 │       ├── admin/                Overview, Clients, Announcements, Requirements,
 │       │                         AdminFaceTest.jsx (records test sessions)
@@ -530,6 +547,15 @@ node db/run-sql.js db/migrate_privacy_consent.sql
 It adds the `privacy_consents` table and keeps all data. Running it twice does no harm.
 Until it's run, clients see "Couldn't load your privacy settings" after logging in.
 
+*Database set up before change password* — run this, once:
+
+```
+node db/run-sql.js db/migrate_account_settings.sql
+```
+
+It adds two columns to `users` (`must_change_password`, `password_changed_at`) and keeps
+all data. Running it twice does no harm. Until it's run, nobody can log in.
+
 Neon's browser query editor can't run files with several statements, so always use the
 helper script. An "already exists" error means that file has already been run.
 
@@ -582,7 +608,8 @@ open a Vercel preview address, since browsers only allow the camera over HTTPS.
 | Client: CBLU 2023 loan form online, printable on long bond paper | Done |
 | Client: tick-only requirements checklist, printed with the form | Done |
 | Client: overview with announcements and progress | Done |
-| Client: profile page | Partial — name is real; other fields are sample data |
+| Client: profile page (details from the database, mobile number, identity status) | Done |
+| Change password; temporary passwords changed at first login; admin password reset | Done |
 | Admin: client progress, requirements checklist (add/edit/remove), announcements | Done |
 | Admin: face check status and history per client; test session recorder | Done |
 | Accuracy scripts: OCR (CER, WER); face (TAR, TRR, FAR, FRR, EER, APCER, BPCER, ACER, time) | Done — waiting on volunteer recordings for face figures |
@@ -612,8 +639,14 @@ open a Vercel preview address, since browsers only allow the camera over HTTPS.
   are told to verify at a branch.
 - **The application is printed, not submitted online.** The bank sees how far a client is,
   but receives the signed form and documents on paper.
-- **Passwords** can't be reset or changed in the portal yet; a client who forgets one asks
-  the branch. The login pause lifts on its own after 15 minutes — admins can't lift it early.
+- **Forgotten passwords** are reset at the branch (an admin gives a temporary password);
+  there's no "forgot password" email, since the system doesn't send email.
+- **Logging out other devices** after a password change or reset happens on their next
+  page load. Until their session expires (7 days), an old session could still call the
+  API directly; ending sessions everywhere at once would need a database check on every
+  request.
+- **Staff passwords:** admins and agents have no Profile page, so they can't change their
+  own password on screen yet (the API, `PUT /api/auth/me`, already works for them).
 - **Privacy requests** (a copy of one's data, deletion) go to the Data Protection Officer
   and are handled by the bank; the portal has no download or delete-my-account button.
   Withdrawing consent stops further use but doesn't delete saved data by itself.
@@ -638,8 +671,7 @@ open a Vercel preview address, since browsers only allow the camera over HTTPS.
 1. Load CBLU's final ID list and requirements.
 2. Measure OCR on real ID photos, and record face check sessions with volunteers
    (both with written consent) for the study; set the face check thresholds from them.
-3. Fill the client profile from `client_profiles`.
-4. Optionally move chatbot replies into the `chatbot_rules` table so admins can edit them.
+3. Optionally move chatbot replies into the `chatbot_rules` table so admins can edit them.
 
 ## Owner
 

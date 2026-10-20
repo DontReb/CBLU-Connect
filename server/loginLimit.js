@@ -111,9 +111,13 @@ export function lockedMessage(status) {
   return `Too many wrong passwords. For your security, logging in to this account is paused. Please try again in ${wait}, or contact your branch if you've forgotten your password.`;
 }
 
-export function wrongPasswordMessage(failuresLeft) {
-  const base = 'Invalid email or password.';
-  if (failuresLeft > 2) return base;
+// " 2 more wrong tries will pause…" when few tries are left, else ''.
+export function triesLeftWarning(failuresLeft) {
+  if (failuresLeft > 2) return '';
   const tries = `${failuresLeft} more wrong ${failuresLeft === 1 ? 'try' : 'tries'}`;
-  return `${base} ${tries} will pause logging in for ${LOGIN_LIMITS.pauseMinutes} minutes.`;
+  return ` ${tries} will pause logging in for ${LOGIN_LIMITS.pauseMinutes} minutes.`;
+}
+
+export function wrongPasswordMessage(failuresLeft) {
+  return `Invalid email or password.${triesLeftWarning(failuresLeft)}`;
 }

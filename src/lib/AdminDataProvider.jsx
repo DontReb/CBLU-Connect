@@ -80,6 +80,16 @@ export default function AdminDataProvider({ children }) {
   }, []);
 
   // One client's ticked requirements, loaded when an admin opens their row.
+  // Gives the client a new temporary password (returned once) and lifts any
+  // login pause; they choose their own at their next login.
+  const resetClientPassword = useCallback(async (id) => {
+    const data = await requestJson(`/api/admin/clients?id=${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ action: 'reset-password' }),
+    });
+    return data.password;
+  }, []);
+
   const loadClientDetail = useCallback(async (id) => {
     const data = await requestJson(`/api/admin/clients?id=${id}`);
     return data.client;
@@ -97,8 +107,9 @@ export default function AdminDataProvider({ children }) {
       deleteChecklistItem,
       loadClientDetail,
       addClient,
+      resetClientPassword,
     }),
-    [clients, clientsStatus, checklist, checklistItems, checklistStatus, addChecklistItem, updateChecklistItem, deleteChecklistItem, loadClientDetail, addClient]
+    [clients, clientsStatus, checklist, checklistItems, checklistStatus, addChecklistItem, updateChecklistItem, deleteChecklistItem, loadClientDetail, addClient, resetClientPassword]
   );
 
   return <AdminDataContext.Provider value={value}>{children}</AdminDataContext.Provider>;

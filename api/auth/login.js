@@ -47,7 +47,7 @@ export default async function handler(req, res) {
     }
 
     const result = await client.query(
-      'SELECT id, email, password_hash, full_name, role, is_active FROM users WHERE email = $1',
+      'SELECT id, email, password_hash, full_name, role, is_active, must_change_password FROM users WHERE email = $1',
       [normalizedEmail]
     );
     const user = result.rows[0];
@@ -81,7 +81,14 @@ export default async function handler(req, res) {
     setSessionCookie(res, token);
 
     return res.status(200).json({
-      user: { id: user.id, email: user.email, fullName: user.full_name, role: user.role },
+      user: {
+        id: user.id,
+        email: user.email,
+        fullName: user.full_name,
+        role: user.role,
+        // A temporary password from the bank: the client chooses their own first.
+        mustChangePassword: user.must_change_password,
+      },
     });
   } catch (err) {
     console.error('Login failed:', err);
