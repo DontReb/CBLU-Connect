@@ -49,6 +49,90 @@ function IdentityChecks({ checks }) {
   );
 }
 
+// A new temporary password for a client who forgot theirs (or is paused
+// after too many wrong tries). Asks first; shows the password once.
+function ResetPassword({ client }) {
+  const { resetClientPassword } = useAdminData();
+  const [step, setStep] = useState('idle'); // idle | confirm | saving | done
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  async function reset() {
+    setStep('saving');
+    setError('');
+    try {
+      setPassword(await resetClientPassword(client.id));
+      setStep('done');
+    } catch (err) {
+      setError(err.message);
+      setStep('confirm');
+    }
+  }
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(`Email: ${client.email}\nTemporary password: ${password}`);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  if (step === 'idle') {
+    return (
+      <Button type="button" variant="ghost" onClick={() => setStep('confirm')} className="px-4 py-2 text-sm">
+        Reset password
+      </Button>
+    );
+  }
+
+  if (step === 'done') {
+    return (
+      <div role="status" className="rounded-xl border border-accent/40 bg-accent-light/25 p-4 text-sm">
+        <p className="text-ink">
+          New temporary password for {client.fullName}:{' '}
+          <span className="font-mono font-semibold">{password}</span>
+        </p>
+        <p className="mt-1 text-xs text-ink-soft">
+          Shown only now. They’ll choose their own password the next time they log in.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Button type="button" variant="ghost" onClick={copy} className="px-4 py-2 text-sm">
+            {copied ? 'Copied' : 'Copy login details'}
+          </Button>
+          <Button type="button" variant="ghost" onClick={() => setStep('idle')} className="px-4 py-2 text-sm">
+            Done
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-line bg-panel p-4 text-sm">
+      <p className="font-medium text-ink">Give {client.fullName} a new temporary password?</p>
+      <p className="mt-1 text-ink">
+        Their current password stops working and they’re logged out everywhere. If logging in is paused after
+        wrong passwords, the pause is lifted. Check it’s really the client asking before you reset.
+      </p>
+      {error && (
+        <p role="alert" className="mt-2 text-red-700">
+          {error}
+        </p>
+      )}
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Button type="button" onClick={reset} disabled={step === 'saving'} className="px-4 py-2 text-sm">
+          {step === 'saving' ? 'Resetting…' : 'Reset password'}
+        </Button>
+        <Button type="button" variant="ghost" onClick={() => setStep('idle')} disabled={step === 'saving'} className="px-4 py-2 text-sm">
+          Cancel
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 const CONSENT_LABELS = { portal: 'Privacy Notice (portal)', id_face: 'ID scan and face check' };
 
 // What the client has agreed to under the Data Privacy Act, and when.
@@ -80,6 +164,10 @@ function ClientDetail({ detail }) {
   const { items, identityChecks, consents } = detail.client;
   return (
     <div className="space-y-4">
+      <div>
+        <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-ink-soft">Login</h3>
+        <ResetPassword client={detail.client} />
+      </div>
       <div>
         <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-ink-soft">Privacy consent</h3>
         <Consents consents={consents} />

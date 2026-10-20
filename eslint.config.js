@@ -32,10 +32,13 @@ export default defineConfig([
     },
   },
 
-  // Face check code shared by the browser and the server — plain JavaScript,
-  // no browser or Node features.
+  // Code shared by the browser and the server (face check, privacy, account
+  // rules) — plain JavaScript, no browser- or Node-only features.
   {
     files: ['shared/**/*.js'],
     extends: [js.configs.recommended],
+    languageOptions: {
+      globals: { TextEncoder: 'readonly' }, // in both browsers and Node
+    },
   },
 ])

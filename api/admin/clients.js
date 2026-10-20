@@ -4,6 +4,7 @@ import { requireRole, hashPassword } from '../../server/auth.js';
 import { LOAN_FORM_CODE } from '../../server/loanForm.js';
 import { MAX_FAILED_TRIES } from '../../server/identity.js';
 import { getConsents } from '../../server/privacy.js';
+import { passwordProblem, PHONE_PATTERN, PHONE_MESSAGE } from '../../shared/account.js';
 
 // GET  /api/admin/clients          → every client with their progress
 // GET /api/admin/clients?id=<id>  → one client: which requirements they've
@@ -15,13 +16,20 @@ import { getConsents } from '../../server/privacy.js';
 //                                   sign-up). Body: { fullName, email,
 //                                   phoneNumber?, branch?, accountNumber?,
 //                                   password? } — leave password out to get
-//                                   a generated one, returned ONCE.
+//                                   a generated one, returned ONCE. Either
+//                                   way the client must choose their own
+//                                   password at their first login.
+// PATCH /api/admin/clients?id=<id> → { action: 'reset-password' }: a new
+//                                   temporary password, returned ONCE. Logs
+//                                   the client out everywhere, lifts any
+//                                   login pause, and makes them choose their
+//                                   own password at their next login.
 //
 // Progress counts the items on the ACTIVE requirements checklist that the
 // client has ticked. Clients only tick what they have — nothing is
 // uploaded — so this shows readiness, not verified documents.
 export default async function handler(req, res) {
-  if (req.method !== 'GET' && req.method !== 'POST') {
+  if (req.method !== 'GET' && req.method !== 'POST' && req.method !== 'PATCH') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
@@ -29,6 +37,7 @@ export default async function handler(req, res) {
   if (!admin) return;
 
   if (req.method === 'POST') return createClient(req, res);
+  if (req.method === 'PATCH') return resetPassword(req, res);
 
   try {
     if (req.query?.id) return await getClient(res, String(req.query.id));
@@ -165,8 +174,6 @@ async function getClient(res, id) {
 // --- creating a client account ----------------------------------------------------
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_PATTERN = /^\+?[0-9][0-9 -]{6,18}$/;
-const MIN_PASSWORD_LENGTH = 8;
 
 // Easy to read aloud or type from a printout: no 0/O, 1/l/I.
 const PASSWORD_LETTERS = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
@@ -191,11 +198,10 @@ async function createClient(req, res) {
   if (fullName.length < 2) return res.status(400).json({ error: "Enter the client's full name." });
   if (!EMAIL_PATTERN.test(email)) return res.status(400).json({ error: 'Enter a valid email address.' });
   if (phoneNumber && !PHONE_PATTERN.test(phoneNumber)) {
-    return res.status(400).json({ error: 'Enter a valid mobile number, e.g. 0917 123 4567.' });
+    return res.status(400).json({ error: PHONE_MESSAGE });
   }
-  if (typedPassword && typedPassword.length < MIN_PASSWORD_LENGTH) {
-    return res.status(400).json({ error: `The password needs at least ${MIN_PASSWORD_LENGTH} characters.` });
-  }
+  const problem = typedPassword ? passwordProblem(typedPassword, email) : '';
+  if (problem) return res.status(400).json({ error: `Password: ${problem}` });
   const password = typedPassword || generatePassword();
 
   let db;
@@ -203,8 +209,8 @@ async function createClient(req, res) {
     db = await pool.connect();
     await db.query('BEGIN');
     const user = await db.query(
-      `INSERT INTO users (email, password_hash, full_name, role, phone_number)
-       VALUES ($1, $2, $3, 'client', $4)
+      `INSERT INTO users (email, password_hash, full_name, role, phone_number, must_change_password)
+       VALUES ($1, $2, $3, 'client', $4, TRUE)
        RETURNING id`,
       [email, await hashPassword(password), fullName, phoneNumber || null]
     );
@@ -230,6 +236,45 @@ async function createClient(req, res) {
     }
     console.error('Failed to create client:', err);
     return res.status(500).json({ error: 'Failed to create the account' });
+  } finally {
+    if (db) db.release();
+  }
+}
+
+// --- resetting a client's password ------------------------------------------------
+
+async function resetPassword(req, res) {
+  const id = String(req.query?.id ?? '');
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return res.status(400).json({ error: 'Invalid client id' });
+  if (req.body?.action !== 'reset-password') {
+    return res.status(400).json({ error: "Send { action: 'reset-password' }" });
+  }
+
+  const password = generatePassword();
+  let db;
+  try {
+    db = await pool.connect();
+    await db.query('BEGIN');
+    const updated = await db.query(
+      `UPDATE users
+       SET password_hash = $2, must_change_password = TRUE, password_changed_at = $3
+       WHERE id = $1 AND role = 'client'
+       RETURNING email`,
+      [id, await hashPassword(password), new Date()]
+    );
+    if (updated.rowCount === 0) {
+      await db.query('ROLLBACK');
+      return res.status(404).json({ error: 'Client not found' });
+    }
+    // Lift any login pause, so the client can log in with the new password now.
+    await db.query('DELETE FROM login_attempts WHERE email = $1 AND NOT succeeded', [updated.rows[0].email]);
+    await db.query('COMMIT');
+    // Only sent now, never again: the database keeps just its hash.
+    return res.status(200).json({ password });
+  } catch (err) {
+    if (db) await db.query('ROLLBACK').catch(() => {});
+    console.error('Failed to reset password:', err);
+    return res.status(500).json({ error: 'Failed to reset the password' });
   } finally {
     if (db) db.release();
   }

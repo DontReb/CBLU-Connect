@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import Button from '../../components/ui/Button';
 import { useAdminData } from '../../lib/adminDataContext';
+import { PASSWORD_HINT } from '../../../shared/account.js';
 
 // Admins create client accounts (there's no public sign-up: the bank
 // decides who gets one). Leave the password empty to get a generated one,
-// shown here ONCE so the admin can hand it to the client.
+// shown here ONCE so the admin can hand it to the client. Either way it's a
+// temporary password: the client chooses their own at their first login.
 
 const INPUT_CLASS =
   'w-full rounded-xl border border-line bg-panel px-3.5 py-2 text-sm text-ink focus:border-accent focus:outline-none';
@@ -49,11 +51,10 @@ function CreatedNotice({ created, onDone, onAddAnother }) {
           {created.password ?? <span className="font-sans font-normal text-ink-soft">the one you typed</span>}
         </dd>
       </dl>
-      {created.password && (
-        <p className="mt-2 text-xs text-ink-soft">
-          This password is shown only now; the system keeps it scrambled and can't show it again.
-        </p>
-      )}
+      <p className="mt-2 text-xs text-ink-soft">
+        {created.password && "This password is shown only now; the system keeps it scrambled and can't show it again. "}
+        The client will choose their own password the first time they log in.
+      </p>
       <div className="mt-4 flex flex-wrap gap-2">
         <Button type="button" variant="ghost" onClick={copy} className="px-4 py-2 text-sm">
           {copied ? 'Copied' : 'Copy login details'}
@@ -119,8 +120,8 @@ export default function AddClientForm({ onClose }) {
         <Field id="new-client-account" label="Account number" hint="If they already have one with the bank.">
           <input id="new-client-account" value={form.accountNumber} onChange={set('accountNumber')} maxLength={50} className={INPUT_CLASS} />
         </Field>
-        <Field id="new-client-password" label="Password" hint="Leave empty to generate one. At least 8 characters if you type one.">
-          <input id="new-client-password" type="text" value={form.password} onChange={set('password')} minLength={8} maxLength={100} autoComplete="new-password" className={INPUT_CLASS} />
+        <Field id="new-client-password" label="Password" hint={`Leave empty to generate one. If you type one: ${PASSWORD_HINT.charAt(0).toLowerCase()}${PASSWORD_HINT.slice(1)}`}>
+          <input id="new-client-password" type="text" value={form.password} onChange={set('password')} minLength={8} maxLength={72} autoComplete="new-password" className={INPUT_CLASS} />
         </Field>
       </div>
 

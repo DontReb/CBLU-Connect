@@ -28,9 +28,9 @@ export const CHAT_RULES = [
       'Our Privacy Notice explains what CBLU Connect collects, why, who can see it and how long it is kept — open it from "Privacy" at the bottom of our homepage. Your ID photo and face check pictures are never saved. Logged-in clients can withdraw consent on the Privacy page of their dashboard. To see, correct or delete your information, contact our Data Protection Officer through your branch.',
   },
   {
-    keywords: ['password', 'forgot', 'log in', 'login', 'sign in', 'signin', 'locked', "can't log in", 'cannot log in'],
+    keywords: ['password', 'change password', 'reset password', 'forgot', 'log in', 'login', 'sign in', 'signin', 'locked', "can't log in", 'cannot log in'],
     reply:
-      'Log in from the Log In button on our homepage, using the email and password the bank gave you. For your security, 5 wrong passwords in a row pause logging in to that account for 15 minutes. Password reset through the portal isn\'t available yet — if you can\'t get in, please contact your branch to reset it.',
+      'Log in from the Log In button on our homepage, using the email and password the bank gave you. For your security, 5 wrong passwords in a row pause logging in to that account for 15 minutes. Logged-in clients can change their password on the Profile page. If you\'ve forgotten it, contact your branch: they\'ll give you a temporary password, and you\'ll choose a new one when you log in.',
   },
   {
     keywords: ['interest', 'interest rate', 'rate', 'rates', 'fee', 'fees', 'charges'],

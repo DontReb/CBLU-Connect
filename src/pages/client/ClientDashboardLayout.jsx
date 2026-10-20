@@ -5,6 +5,7 @@ import PrivacyProvider from '../../lib/PrivacyProvider';
 import { useAuth } from '../../lib/authContext';
 import { usePrivacy } from '../../lib/privacyContext';
 import PrivacyConsent from './PrivacyConsent';
+import SetNewPassword from './SetNewPassword';
 
 const NAV_ITEMS = [
   { to: '/dashboard/client', label: 'Overview', icon: 'home', end: true },
@@ -15,10 +16,13 @@ const NAV_ITEMS = [
   { to: '/dashboard/client/privacy', label: 'Privacy', icon: 'shield' },
 ];
 
-// The dashboard pages appear only after the client has agreed to the
-// current Privacy Notice; until then, the consent screen shows instead.
+// Before the dashboard pages: first a client with a temporary password from
+// the bank chooses their own, then they agree to the current Privacy
+// Notice. Until then, those screens show instead.
 function ConsentGate({ onLogout }) {
+  const { user } = useAuth();
   const { consents, status } = usePrivacy();
+  if (user.mustChangePassword) return <SetNewPassword onLogout={onLogout} />;
   if (status !== 'ready' || !consents.portal.current) return <PrivacyConsent onLogout={onLogout} />;
   return (
     <ChecklistProvider>
