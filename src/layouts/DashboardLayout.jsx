@@ -57,6 +57,12 @@ const ICON_PATHS = {
   chat: <path d="M4 5h16v11H8l-4 4V5z" />,
   menu: <path d="M4 7h16M4 12h16M4 17h16" />,
   close: <path d="M6 6l12 12M18 6 6 18" />,
+  shield: (
+    <>
+      <path d="M12 3.5 5 6v5.5c0 4.2 2.9 7.9 7 9 4.1-1.1 7-4.8 7-9V6z" />
+      <path d="M9.25 12.25 11.25 14.25 15 10.5" />
+    </>
+  ),
   logout: (
     <>
       <path d="M14 8V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5a2 2 0 0 0 2-2v-2" />

@@ -136,9 +136,12 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <p className="mt-6 text-center text-sm text-ink-soft">
+        <p className="mt-6 flex justify-center gap-5 text-sm text-ink-soft">
           <Link to="/" className="hover:text-accent-dark">
             ← Back to home
+          </Link>
+          <Link to="/privacy" className="hover:text-accent-dark">
+            Privacy Notice
           </Link>
         </p>
       </div>

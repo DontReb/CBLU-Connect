@@ -2,6 +2,7 @@ import { pool } from '../../server/db.js';
 import { requireRole } from '../../server/auth.js';
 import { loadLoanForm, ensureSubmission, loadValues } from '../../server/loanForm.js';
 import { identityStatus } from '../../server/identity.js';
+import { requireConsent } from '../../server/privacy.js';
 
 // The client's loan application (one file, so it counts once toward
 // Vercel's free-plan function limit):
@@ -69,10 +70,17 @@ async function getApplication(res, client) {
 // Body: { values: { [fieldKey]: { value: string, source: 'ocr' | 'manual' } } }
 //    or { clear: true } — erase every answer (the "Clear form" button)
 async function saveApplication(req, res, client) {
+  // Clearing is always allowed (it deletes data); saving needs consent.
   if (req.body?.clear === true) return clearApplication(res, client);
   const incoming = req.body?.values;
   if (!incoming || typeof incoming !== 'object') {
     return res.status(400).json({ error: 'values is required' });
+  }
+  try {
+    if (!(await requireConsent(res, client.sub, 'portal'))) return;
+  } catch (err) {
+    console.error('Consent check failed:', err);
+    return res.status(500).json({ error: 'Failed to save loan application' });
   }
 
   let db;
