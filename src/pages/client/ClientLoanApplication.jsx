@@ -4,6 +4,8 @@ import Button from '../../components/ui/Button';
 import DynamicFormField from '../../components/DynamicFormField';
 import FaceCheck from '../../components/FaceCheck';
 import { prepareIdPhoto } from '../../lib/idPhoto';
+import { usePrivacy } from '../../lib/privacyContext';
+import { CONSENT_PURPOSES } from '../../../shared/privacy.js';
 
 // CBLU's Loan Application Form (Individual and Sole Proprietor, REV. 2023),
 // filled in online and then printed. The fields come from the database
@@ -111,6 +113,56 @@ function IdPhotoPicker({ id, label, hint, file, onChange, disabled }) {
 }
 
 // --- what a scan found, before the face check ---------------------------------------
+
+// The ID scan and face check need their own consent (separate from using
+// the portal), asked here, right where it's used. Not agreeing is fine:
+// the client types the form instead.
+function ScanConsent() {
+  const { setConsent } = usePrivacy();
+  const [ticked, setTicked] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  async function agree() {
+    setSaving(true);
+    setError('');
+    try {
+      await setConsent('id_face', true);
+    } catch (err) {
+      setError(err.message);
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="mt-4 rounded-xl border border-line bg-paper p-4">
+      <p className="text-sm font-medium text-ink">Before you scan</p>
+      <label className="mt-2 flex cursor-pointer items-start gap-3 text-sm text-ink">
+        <input
+          type="checkbox"
+          checked={ticked}
+          onChange={(e) => setTicked(e.target.checked)}
+          className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--color-accent-dark)]"
+        />
+        <span>{CONSENT_PURPOSES.id_face.statement}</span>
+      </label>
+      {error && (
+        <p role="alert" className="mt-2 text-sm text-red-700">
+          {error}
+        </p>
+      )}
+      <Button type="button" onClick={agree} disabled={!ticked || saving} className="mt-3 px-5 py-2.5 text-sm">
+        {saving ? 'Saving…' : 'Agree and scan my ID'}
+      </Button>
+      <p className="mt-2 text-xs text-ink-soft">
+        Optional. Or skip this and type your details in the form below.{' '}
+        <Link to="/privacy" target="_blank" rel="noopener" className="underline">
+          Privacy Notice
+        </Link>
+      </p>
+    </div>
+  );
+}
 
 function ScanPreview({ scan, labelByKey, onStartFaceCheck, starting, disabled }) {
   const names = (keys) => keys.map((key) => labelByKey[key] ?? key).join(', ');
@@ -282,6 +334,8 @@ function ClearFormDialog({ filledCount, clearing, error, onConfirm, onCancel }) 
 
 export default function ClientLoanApplication() {
   const navigate = useNavigate();
+  const { consents } = usePrivacy();
+  const scanAgreed = consents.id_face.current;
   const [loadStatus, setLoadStatus] = useState('loading'); // loading | ready | error
   const [loadError, setLoadError] = useState('');
   const [form, setForm] = useState({ template: null, fields: [] });
@@ -586,41 +640,54 @@ export default function ClientLoanApplication() {
           </p>
         )}
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <IdPhotoPicker
-            id="id-front"
-            label="Front of your ID"
-            hint="Required"
-            file={frontPhoto}
-            onChange={setFrontPhoto}
-            disabled={scanning || verifying || identity?.locked}
-          />
-          <IdPhotoPicker
-            id="id-back"
-            label="Back of your ID"
-            hint="PhilSys ID only — fills sex and civil status"
-            file={backPhoto}
-            onChange={setBackPhoto}
-            disabled={scanning || verifying || identity?.locked}
-          />
-        </div>
+        {!scanAgreed && <ScanConsent />}
 
-        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
-          <Button
-            type="button"
-            variant={pendingScan ? 'ghost' : 'primary'}
-            onClick={handleScan}
-            disabled={!frontPhoto || scanning || verifying || identity?.locked}
-            className="px-5 py-2.5 text-sm"
-          >
-            {scanning ? 'Reading your ID…' : 'Read my ID'}
-          </Button>
-          <p className="min-w-0 flex-1 text-xs text-ink-soft">
-            {scanning
-              ? 'This can take up to a minute.'
-              : 'Your photos are only read, then deleted. They are not saved.'}
-          </p>
-        </div>
+        {scanAgreed && (
+          <>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <IdPhotoPicker
+                id="id-front"
+                label="Front of your ID"
+                hint="Required"
+                file={frontPhoto}
+                onChange={setFrontPhoto}
+                disabled={scanning || verifying || identity?.locked}
+              />
+              <IdPhotoPicker
+                id="id-back"
+                label="Back of your ID"
+                hint="PhilSys ID only — fills sex and civil status"
+                file={backPhoto}
+                onChange={setBackPhoto}
+                disabled={scanning || verifying || identity?.locked}
+              />
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+              <Button
+                type="button"
+                variant={pendingScan ? 'ghost' : 'primary'}
+                onClick={handleScan}
+                disabled={!frontPhoto || scanning || verifying || identity?.locked}
+                className="px-5 py-2.5 text-sm"
+              >
+                {scanning ? 'Reading your ID…' : 'Read my ID'}
+              </Button>
+              <p className="min-w-0 flex-1 text-xs text-ink-soft">
+                {scanning
+                  ? 'This can take up to a minute.'
+                  : 'Your photos are only read, then deleted. They are not saved.'}
+              </p>
+            </div>
+            <p className="mt-2 text-xs text-ink-soft">
+              You agreed to the ID scan and face check. You can withdraw this on the{' '}
+              <Link to="/dashboard/client/privacy" className="underline">
+                Privacy page
+              </Link>
+              .
+            </p>
+          </>
+        )}
 
         {scanError && (
           <p role="alert" className="mt-3 text-sm text-red-700">

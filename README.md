@@ -54,6 +54,10 @@ Neon's SQL Editor:
 DELETE FROM login_attempts WHERE email = 'maria.santos@cblu.test';
 ```
 
+**Privacy consent.** The first time a client logs in, they see the privacy consent screen
+before their dashboard. Tick the statement and click **Agree and continue**. To see that
+screen again while testing, withdraw consent on the client's **Privacy** page.
+
 **New client accounts** are made by an administrator: **Clients → Add client**. There's no
 public sign-up, so the bank decides who gets an account. Leave the password empty to get a
 generated one (like `Kp7m-Qx3t-Rw9z`); it is shown once, with a button to copy the login
@@ -89,11 +93,19 @@ Open a normal window for Maria and a private (incognito) window for Carlo, side 
   printing the form, logging in, branches and hours. The chat can be expanded to full
   screen (Esc shrinks it back).
 - Log in. Asking the chatbot for a person prompts them to log in first.
+- Read the **Privacy Notice** (`/privacy`, linked from the footer and the login page).
 
 **Clients**
+- **Agree to the Privacy Notice** before using the portal (Data Privacy Act, RA 10173).
+  The loan form asks for sensitive personal information (age, civil status, TIN), which
+  needs consent given beforehand. The client sees a short summary with a link to the full
+  notice, ticks the statement, and clicks **Agree and continue**. A client who doesn't
+  agree can log out and apply at a branch. Changing `PRIVACY_NOTICE_VERSION` in
+  `shared/privacy.js` asks every client again.
 - See an overview: the latest announcements, how far their loan application is, and
   which requirements they have ready.
-- **Loan Application:** upload a photo of the front of a valid ID (and, for a PhilSys ID,
+- **Loan Application:** the ID scan and face check need a **separate, optional consent**,
+  asked right above the scan; without it, the client types the form. Then upload a photo of the front of a valid ID (and, for a PhilSys ID,
   the back). The scan shows what it read and what it will fill, which it couldn't read,
   and anything to double-check. Then a **face check** (about 20 seconds): look straight,
   hold still while the screen flashes colours, turn left and right as asked, look straight
@@ -114,6 +126,8 @@ Open a normal window for Maria and a private (incognito) window for Carlo, side 
 - **Announcements:** every announcement from the bank, newest first (the overview shows
   the latest three).
 - Chat with a live agent. The agent sees the conversation the client had with the bot.
+- **Privacy:** see what they've agreed to and when, withdraw either consent (as easily as
+  they gave it), and find how to reach the Data Protection Officer.
 
 **Administrators**
 - Create client accounts (name, email, and optionally mobile number, branch, account
@@ -121,7 +135,8 @@ Open a normal window for Maria and a private (incognito) window for Carlo, side 
 - See every client: face check status (verified / failed today / locked), application
   progress (not started / required fields filled / form complete), which ID filled it, and
   how many requirements they've ticked — open a client to see their latest face checks
-  (result, reason, scores, time) and exactly which documents they ticked.
+  (result, reason, scores, time), which privacy consents they've given and when, and
+  exactly which documents they ticked.
 - **Face check tests:** record test sessions with consenting volunteers (real person,
   printed photo, phone/tablet screen) for measuring accuracy. Recordings download to the
   admin's computer only.
@@ -333,7 +348,8 @@ CBLU-Connect/
 │   ├── auth/
 │   │   ├── login.js              POST — check email + password (with the attempt limit), set the session cookie
 │   │   ├── logout.js             POST — clear the session cookie
-│   │   └── me.js                 GET  — who is logged in
+│   │   └── me.js                 GET  — who is logged in (+ a client's privacy consents)
+│   │                             POST — a client agrees to or withdraws a consent
 │   ├── admin/
 │   │   ├── clients.js            GET  — clients + progress; ?id= one client's ticks
 │   │   │                         POST — create a client account
@@ -353,6 +369,7 @@ CBLU-Connect/
 │   │                             count as a function
 │   ├── auth.js                   Password hashing, sessions, requireRole()
 │   ├── loginLimit.js             Wrong-password limit: 5 per account, 20 per address, 15-minute pause
+│   ├── privacy.js                Consent records; requireConsent() for endpoints with personal data
 │   ├── db.js                     Database connection (SSL always on)
 │   ├── ocr.js                    Photo clean-up (sharp, portrait blanked) + Tesseract.js
 │   ├── idParsers.js              Reads PhilSys / Driver's License / Passport text
@@ -368,6 +385,7 @@ CBLU-Connect/
 │       ├── flash.js              Did the face's colour follow the flashes?
 │       └── verify.js             The decision: face verification + liveness, thresholds
 │
+├── shared/privacy.js              Privacy notice version, consent wording, DPO contact
 ├── shared/face/                  Used by both the browser and the server
 │   ├── yunet.js                  YuNet input/output decoding
 │   ├── pose.js                   Head turn from the 5 landmarks
@@ -387,6 +405,7 @@ CBLU-Connect/
 │   ├── migrate_id_scan.sql       ONE-TIME update for a database set up before Oct 2026
 │   ├── migrate_face_check.sql    ONE-TIME update adding the face check tables
 │   ├── migrate_login_limit.sql   ONE-TIME update adding the login_attempts table
+│   ├── migrate_privacy_consent.sql  ONE-TIME update adding the privacy_consents table
 │   └── run-sql.js                node db/run-sql.js <file> — runs a .sql file
 │
 ├── src/
@@ -406,11 +425,12 @@ CBLU-Connect/
 │   │   ├── chatRules.js          Chatbot replies, and which messages mean "get me a person"
 │   │   ├── chatApi.js            Calls api/chat.js
 │   │   ├── *Context.js / *Provider.jsx   Shared state: login, chat, checklist,
-│   │   │                                 admin data, agent queue
+│   │   │                                 admin data, agent queue, privacy consents
 │   │   └── mockClient.js         Profile page sample data (see status below)
 │   └── pages/
-│       ├── LandingPage.jsx, LoginPage.jsx
+│       ├── LandingPage.jsx, LoginPage.jsx, PrivacyNotice.jsx
 │       ├── client/               Overview, Loan Application, Requirements, Announcements, Profile,
+│       │                         Privacy, PrivacyConsent.jsx (the consent screen),
 │       │                         ClientLoanApplicationPrint.jsx (+ its .css)
 │       ├── admin/                Overview, Clients, Announcements, Requirements,
 │       │                         AdminFaceTest.jsx (records test sessions)
@@ -501,6 +521,15 @@ node db/run-sql.js db/migrate_login_limit.sql
 It adds the `login_attempts` table and keeps all data. Running it twice does no harm.
 Until it's run, every login fails with "Login failed".
 
+*Database set up before the privacy consent* — run this, once:
+
+```
+node db/run-sql.js db/migrate_privacy_consent.sql
+```
+
+It adds the `privacy_consents` table and keeps all data. Running it twice does no harm.
+Until it's run, clients see "Couldn't load your privacy settings" after logging in.
+
 Neon's browser query editor can't run files with several statements, so always use the
 helper script. An "already exists" error means that file has already been run.
 
@@ -545,6 +574,7 @@ open a Vercel preview address, since browsers only allow the camera over HTTPS.
 |---|---|
 | Login, logout, role-based pages and API | Done |
 | Login attempt limit (5 wrong passwords → 15-minute pause; 20 per address) | Done |
+| Privacy Notice page; consent before using the portal and, separately, before the ID scan and face check; withdraw on the Privacy page; consent shown to admins | Done |
 | Chatbot on every page (rule-based replies in `chatRules.js`) | Done |
 | Live chat between client and agent | Done — polling every 3–4 seconds |
 | Client: ID scan fills the loan form (PhilSys, Driver's License, Passport) | Done |
@@ -584,6 +614,9 @@ open a Vercel preview address, since browsers only allow the camera over HTTPS.
   but receives the signed form and documents on paper.
 - **Passwords** can't be reset or changed in the portal yet; a client who forgets one asks
   the branch. The login pause lifts on its own after 15 minutes — admins can't lift it early.
+- **Privacy requests** (a copy of one's data, deletion) go to the Data Protection Officer
+  and are handled by the bank; the portal has no download or delete-my-account button.
+  Withdrawing consent stops further use but doesn't delete saved data by itself.
 - **Live chat** is for logged-in clients only. There is no "no agent online" notice.
 - **Chatbot replies** live in `chatRules.js`. The `chatbot_rules` table exists but isn't
   used yet.
@@ -597,6 +630,8 @@ open a Vercel preview address, since browsers only allow the camera over HTTPS.
   can edit them on the Requirements page).
 - Whether the officers' names should be pre-printed under "For Bank's Use Only"
   (`BANK_SIGNATORIES` in `ClientLoanApplicationPrint.jsx`).
+- The Data Protection Officer's name and email (`PRIVACY_CONTACT` in `shared/privacy.js`),
+  and the bank's review of the Privacy Notice, especially how long loan records are kept.
 
 ## Next steps
 

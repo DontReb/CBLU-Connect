@@ -10,6 +10,7 @@ import {
 import { makeChallenge, frameNames } from '../../shared/face/challenge.js';
 import { loadRgb } from '../../server/face/image.js';
 import { checkIdentity, REASONS } from '../../server/face/verify.js';
+import { requireConsent } from '../../server/privacy.js';
 
 // The live face check (face verification + liveness detection):
 //
@@ -43,10 +44,20 @@ const MESSAGES = {
 export default async function handler(req, res) {
   const client = requireRole(req, res, 'client');
   if (!client) return;
+  if (req.method !== 'GET' && req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // No consent, no face check: checked before any picture is received.
+  try {
+    if (!(await requireConsent(res, client.sub, 'portal', 'id_face'))) return;
+  } catch (err) {
+    console.error('Consent check failed:', err);
+    return res.status(500).json({ error: 'Could not start the face check — try again.' });
+  }
 
   if (req.method === 'GET') return issueChallenge(res, client);
-  if (req.method === 'POST') return verify(req, res, client);
-  return res.status(405).json({ error: 'Method not allowed' });
+  return verify(req, res, client);
 }
 
 async function issueChallenge(res, client) {

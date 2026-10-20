@@ -50,6 +50,27 @@ CREATE INDEX idx_login_attempts_ip ON login_attempts(ip, created_at);
 CREATE INDEX idx_login_attempts_created ON login_attempts(created_at);
 
 -- ----------------------------------------------------------------------------
+-- PRIVACY CONSENTS — proof of consent under the Data Privacy Act (RA 10173,
+-- NPC Circular 2023-04). One row per agree or withdraw; rows are never
+-- changed, so the history stays. The latest row per purpose is the
+-- client's current answer. purpose: 'portal' (using the client portal,
+-- required) or 'id_face' (ID scan + face check, optional).
+-- ----------------------------------------------------------------------------
+
+CREATE TABLE privacy_consents (
+    id              BIGSERIAL PRIMARY KEY,
+    user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    purpose         VARCHAR(20) NOT NULL CHECK (purpose IN ('portal', 'id_face')),
+    given           BOOLEAN NOT NULL,          -- true = agreed, false = withdrew
+    notice_version  VARCHAR(20) NOT NULL,      -- PRIVACY_NOTICE_VERSION in shared/privacy.js
+    ip              VARCHAR(64),
+    user_agent      VARCHAR(255),
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_privacy_consents_user ON privacy_consents(user_id, purpose, created_at);
+
+-- ----------------------------------------------------------------------------
 -- ADMIN — internal staff who manage chatbot rules, agents, and content.
 -- ----------------------------------------------------------------------------
 

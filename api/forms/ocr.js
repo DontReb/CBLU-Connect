@@ -7,6 +7,7 @@ import { ID_LABELS, UNKNOWN_ID_MESSAGE } from '../../server/idParsers.js';
 import { scanId } from '../../server/idScan.js';
 import { loadLoanForm, loadValues } from '../../server/loanForm.js';
 import { identityStatus, signScanToken, photoFingerprint, LOCKED_MESSAGE } from '../../server/identity.js';
+import { requireConsent } from '../../server/privacy.js';
 
 // POST /api/forms/ocr — multipart: "front" (required) and "back" (optional)
 // photos of ONE valid ID: PhilSys National ID, Driver's License or Passport.
@@ -37,6 +38,9 @@ export default async function handler(req, res) {
 
   const tempFiles = [];
   try {
+    // No consent, no reading: checked before the photos are even received.
+    if (!(await requireConsent(res, client.sub, 'portal', 'id_face'))) return;
+
     const { files } = await parseForm(req);
     const front = files.front?.[0];
     const back = files.back?.[0];

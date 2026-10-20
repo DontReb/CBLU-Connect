@@ -3,11 +3,13 @@ import { pool } from '../../server/db.js';
 import { requireRole, hashPassword } from '../../server/auth.js';
 import { LOAN_FORM_CODE } from '../../server/loanForm.js';
 import { MAX_FAILED_TRIES } from '../../server/identity.js';
+import { getConsents } from '../../server/privacy.js';
 
 // GET  /api/admin/clients          → every client with their progress
 // GET /api/admin/clients?id=<id>  → one client: which requirements they've
 //                                   ticked, how far their loan application
-//                                   is, and their recent face checks
+//                                   is, their recent face checks, and
+//                                   their privacy consents
 // POST /api/admin/clients          → create a client account (the bank
 //                                   creates accounts; there's no public
 //                                   sign-up). Body: { fullName, email,
@@ -147,6 +149,7 @@ async function getClient(res, id) {
   return res.status(200).json({
     client: {
       ...toClient(result.rows[0]),
+      consents: await getConsents(id),
       identityChecks: checks.rows,
       items: items.rows.map((row) => ({
         id: row.id,

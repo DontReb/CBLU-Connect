@@ -23,6 +23,11 @@ export const CHAT_RULES = [
       "After you scan your ID, a face check uses your camera to confirm the ID is yours: look straight, hold still while the screen flashes colours, then turn your head left and right as asked. Turn your screen brightness up and face a light. You have 3 tries a day; after that, scanning is locked until tomorrow and you can verify at any CBLU branch instead — you can still type the form by hand. The pictures are only checked, never saved.",
   },
   {
+    keywords: ['privacy', 'data privacy', 'personal data', 'personal information', 'consent', 'delete my data', 'my data', 'data protection'],
+    reply:
+      'Our Privacy Notice explains what CBLU Connect collects, why, who can see it and how long it is kept — open it from "Privacy" at the bottom of our homepage. Your ID photo and face check pictures are never saved. Logged-in clients can withdraw consent on the Privacy page of their dashboard. To see, correct or delete your information, contact our Data Protection Officer through your branch.',
+  },
+  {
     keywords: ['password', 'forgot', 'log in', 'login', 'sign in', 'signin', 'locked', "can't log in", 'cannot log in'],
     reply:
       'Log in from the Log In button on our homepage, using the email and password the bank gave you. For your security, 5 wrong passwords in a row pause logging in to that account for 15 minutes. Password reset through the portal isn\'t available yet — if you can\'t get in, please contact your branch to reset it.',

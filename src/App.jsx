@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import { AnimatePresence } from 'motion/react';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
+import PrivacyNotice from './pages/PrivacyNotice';
 import PageTransition from './components/PageTransition';
 import AuthProvider from './lib/AuthProvider';
 import ChatProvider from './lib/ChatProvider';
@@ -16,6 +17,7 @@ import ClientAnnouncements from './pages/client/ClientAnnouncements';
 import ClientLoanApplication from './pages/client/ClientLoanApplication';
 import ClientLoanApplicationPrint from './pages/client/ClientLoanApplicationPrint';
 import ClientProfile from './pages/client/ClientProfile';
+import ClientPrivacy from './pages/client/ClientPrivacy';
 import AdminDashboardLayout from './pages/admin/AdminDashboardLayout';
 import AdminOverview from './pages/admin/AdminOverview';
 import AdminClients from './pages/admin/AdminClients';
@@ -53,6 +55,14 @@ function AnimatedRoutes() {
             </PageTransition>
           }
         />
+        <Route
+          path="/privacy"
+          element={
+            <PageTransition>
+              <PrivacyNotice />
+            </PageTransition>
+          }
+        />
 
         <Route element={<RequireRole role="client" />}>
           <Route
@@ -69,6 +79,7 @@ function AnimatedRoutes() {
             <Route path="announcements" element={<ClientAnnouncements />} />
             <Route path="documents" element={<Navigate to="/dashboard/client/requirements" replace />} />
             <Route path="profile" element={<ClientProfile />} />
+            <Route path="privacy" element={<ClientPrivacy />} />
           </Route>
           {/* Outside the dashboard layout, so only the form itself prints */}
           <Route path="/print/loan-application" element={<ClientLoanApplicationPrint />} />

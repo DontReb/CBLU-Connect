@@ -49,13 +49,41 @@ function IdentityChecks({ checks }) {
   );
 }
 
-// The requirements one client has ticked and their face checks, shown under their row.
+const CONSENT_LABELS = { portal: 'Privacy Notice (portal)', id_face: 'ID scan and face check' };
+
+// What the client has agreed to under the Data Privacy Act, and when.
+function Consents({ consents }) {
+  if (!consents) return null;
+  return (
+    <ul className="space-y-1 text-sm">
+      {Object.entries(CONSENT_LABELS).map(([purpose, label]) => {
+        const consent = consents[purpose];
+        let text = 'Not agreed';
+        if (consent?.current) text = `Agreed ${formatDate(consent.at)}`;
+        else if (consent?.given) text = `Agreed to an older notice (${consent.version})`;
+        else if (consent?.at) text = `Withdrawn ${formatDate(consent.at)}`;
+        return (
+          <li key={purpose} className="flex flex-wrap gap-x-2">
+            <span className="text-ink">{label}:</span>
+            <span className={consent?.current ? 'font-medium text-accent-dark' : 'text-ink-soft'}>{text}</span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+// The requirements one client has ticked, their face checks and consents, shown under their row.
 function ClientDetail({ detail }) {
   if (detail.status === 'loading') return <p className="text-sm text-ink-soft">Loading…</p>;
   if (detail.status === 'error') return <p className="text-sm text-red-700">Couldn't load this client's details.</p>;
-  const { items, identityChecks } = detail.client;
+  const { items, identityChecks, consents } = detail.client;
   return (
     <div className="space-y-4">
+      <div>
+        <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-ink-soft">Privacy consent</h3>
+        <Consents consents={consents} />
+      </div>
       <div>
         <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-ink-soft">Face checks</h3>
         <IdentityChecks checks={identityChecks ?? []} />
